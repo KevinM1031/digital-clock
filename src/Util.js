@@ -1,3 +1,7 @@
+export function isLandscape(width, height) {
+    return height / width < 1.5;
+}
+
 export function getDateStr(date) {
     let str = date.getFullYear() + '/';
     str += (date.getMonth() < 9 ? '0' + (date.getMonth()+1) : date.getMonth()+1) + '/';
@@ -16,7 +20,7 @@ export function getDateStr(date) {
 }
 
 export function getTimeStr(date) {
-    const hr = date.getHours() > 12 ? date.getHours() - 12 : date.getHours() == 0 ? 12 : date.getHours();
+    const hr = date.getHours() > 12 ? date.getHours() - 12 : date.getHours() === 0 ? 12 : date.getHours();
     let str = (hr < 10 ? '0' + hr : hr) + ':';
     str += (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
     str += (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds()) + ' ';
@@ -24,11 +28,10 @@ export function getTimeStr(date) {
     return str;
 }
 
-export function getTimezoneStr(date) {
-    const tOff = date.getTimezoneOffset();
+export function getTimezoneStr(tOff) {
     let str = tOff < 0 ? "UTC + " : "UTC - ";
-    str += (Math.floor(tOff / 60) < 10 ? '0' + Math.abs(Math.floor(tOff / 60)) : Math.abs(Math.floor(tOff / 60))) + ":";
-    str += "" + Math.floor(tOff % 60) < 10 ? '0' + Math.abs(Math.floor(tOff % 60)) : Math.abs(Math.floor(tOff % 60));
+    str += (Math.floor(Math.abs(tOff / 60)) < 10 ? '0' + Math.floor(Math.abs(tOff / 60)) : Math.floor(Math.abs(tOff / 60))) + ":";
+    str += "" + Math.floor(Math.abs(tOff % 60)) < 10 ? '0' + Math.floor(Math.abs(tOff % 60)) : Math.floor(Math.abs(tOff % 60));
     return str;
 }
 

@@ -1,15 +1,14 @@
-import { MainPage } from "./pages/MainPage";
-import { ThemeProvider } from '@material-ui/core/styles';
-import theme from "./components/ui/Theme"
+import Clock from "./Clock.js";
 
 const App = () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const lat = queryParams.get('lat');
+    const lon = queryParams.get('lon');
+    const tz = queryParams.get('tz');
 
     return (
-        <ThemeProvider theme={theme}>
-            <MainPage/>
-        </ThemeProvider>
-
-  );
+        <Clock lat={lat} lon={lon} tz={tz}/>
+    )
 }
 
 export default App;
