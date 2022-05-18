@@ -1,6 +1,6 @@
 {
   "homepage": "https://kevinm1031.github.io/digital-clock",
-  "name": "main-page",
+  "name": "digital-clock",
   "version": "1.2.8",
   "private": true,
   "dependencies": {
