@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import * as POSTPROCESSING from 'postprocessing';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { isLandscape, getSunPos, getMoonPos, getDateStr, getTimeStr, getTimezoneStr } from './Util.js';
+import { getWidth, getHeight, isLandscape, getSunPos, getMoonPos, getDateStr, getTimeStr, getTimezoneStr } from './Util.js';
 
 import landModel from './land.glb';
 
@@ -42,9 +42,12 @@ class Clock extends Component {
         this.canvas = document.createElement('canvas');
         this.mount.appendChild(this.canvas);
 
-        this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+        const width = getWidth();
+        const height = getHeight();
+
+        this.camera = new THREE.PerspectiveCamera( 60, width / height, 1, 1000 );
         this.camera.position.set(-9, 4, -4);
-        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
 
         this.scene = new THREE.Scene();
@@ -60,7 +63,7 @@ class Clock extends Component {
             alpha: true
 		})
         this.renderer.setPixelRatio( window.devicePixelRatio );
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setSize(width, height);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         
@@ -223,6 +226,10 @@ class Clock extends Component {
         //date.setFullYear(2017, 7, 21);
         //date.setHours(14, 36, 0);
 
+        // Get screen dimensions
+        const width = getWidth();
+        const height = getHeight();
+
         // Sun position calculation
         const sunDist = 6;
         const sunPos = getSunPos(date, this.lat, this.lon);
@@ -271,45 +278,45 @@ class Clock extends Component {
         this.ambientLight.color.setRGB(ambientIllum, ambientIllum, ambientIllum);
 
         // Time text update
-        const landscape = isLandscape(window.innerWidth, window.innerHeight);
+        const landscape = isLandscape();
         const textColor = sunPos.altitude < -0.314159 ? 'cornflowerblue' 
             : sunPos.altitude > 0.314159 ? '#5de356' : 'coral'; // based on astronomical twilight
 
         const timeText = this.mount.parentElement.children[1];
-        timeText.style.left = window.innerWidth/2 - timeText.clientWidth/2 + 'px';
-        timeText.style.top = window.innerHeight * 0.08 + 'px';
+        timeText.style.left = width/2 - timeText.clientWidth/2 + 'px';
+        timeText.style.top = height * 0.08 + 'px';
         timeText.style.color = textColor;
         timeText.style.fontSize = landscape ? '70px' : '47px';
         timeText.replaceChildren(getTimeStr(date));
 
         // Date text update
         const dateText = this.mount.parentElement.children[2];
-        dateText.style.left = window.innerWidth/2 - dateText.clientWidth/2 + 'px';
-        dateText.style.top = window.innerHeight * 0.2 + 'px';
+        dateText.style.left = width/2 - dateText.clientWidth/2 + 'px';
+        dateText.style.top = height * 0.2 + 'px';
         dateText.style.color = textColor;
         dateText.style.fontSize = landscape ? '40px' : '27px';
         dateText.replaceChildren(getDateStr(date));
 
         // Timezone text update
         const timezoneText = this.mount.parentElement.children[3];
-        timezoneText.style.left = window.innerWidth/2 - timezoneText.clientWidth/2 + 'px';
-        timezoneText.style.top = window.innerHeight * 0.78 + 'px';
+        timezoneText.style.left = width/2 - timezoneText.clientWidth/2 + 'px';
+        timezoneText.style.top = height * 0.78 + 'px';
         timezoneText.style.color = textColor;
         timezoneText.style.fontSize = landscape ? '40px' : '27px';
         timezoneText.replaceChildren(getTimezoneStr(this.tz ? this.tz : date.getTimezoneOffset()));
 
         // Coordinate text update
         const coordText = this.mount.parentElement.children[4];
-        coordText.style.left = window.innerWidth/2 - coordText.clientWidth/2 + 'px';
-        coordText.style.top = window.innerHeight * 0.85 + 'px';
+        coordText.style.left = width/2 - coordText.clientWidth/2 + 'px';
+        coordText.style.top = height * 0.85 + 'px';
         coordText.style.color = textColor;
         coordText.style.fontSize = landscape ? '15px' : '10px';
         coordText.replaceChildren("GCS [" + this.lat + ", " + this.lon + "]");
 
         // Sun position text update
         const sunPosText = this.mount.parentElement.children[5];
-        sunPosText.style.left = window.innerWidth/2 - sunPosText.clientWidth/2 + 'px';
-        sunPosText.style.top = window.innerHeight * 0.88 + 'px';
+        sunPosText.style.left = width/2 - sunPosText.clientWidth/2 + 'px';
+        sunPosText.style.top = height * 0.88 + 'px';
         sunPosText.style.color = textColor;
         sunPosText.style.fontSize = landscape ? '15px' : '10px';
         sunPosText.replaceChildren("☉ Alt/Az [" 
@@ -318,8 +325,8 @@ class Clock extends Component {
 
         // Moon position text update
         const moonPosText = this.mount.parentElement.children[6];
-        moonPosText.style.left = window.innerWidth/2 - moonPosText.clientWidth/2 + 'px';
-        moonPosText.style.top = window.innerHeight * 0.905 + 'px';
+        moonPosText.style.left = width/2 - moonPosText.clientWidth/2 + 'px';
+        moonPosText.style.top = height * 0.905 + 'px';
         moonPosText.style.color = textColor;
         moonPosText.style.fontSize = landscape ? '15px' : '10px';
         moonPosText.replaceChildren("☾ Alt/Az [" 
@@ -342,8 +349,10 @@ class Clock extends Component {
 
     resize() {
         if (!this.composer || !this.camera) return;
-            this.composer.setSize(window.innerWidth, window.innerHeight);
-            this.camera.aspect = window.innerWidth / window.innerHeight;
+            const width = getWidth();
+            const height = getHeight();
+            this.composer.setSize(width, height);
+            this.camera.aspect = width / height;
             this.camera.updateProjectionMatrix();
             this.initGodRays();
     }

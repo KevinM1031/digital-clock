@@ -1,5 +1,13 @@
-export function isLandscape(width, height) {
-    return height / width < 1.5;
+export function getWidth() {
+    return document.documentElement.clientWidth;
+}
+
+export function getHeight() {
+    return document.documentElement.clientHeight;
+}
+
+export function isLandscape() {
+    return getHeight() / getWidth() < 1.5;
 }
 
 export function getDateStr(date) {
