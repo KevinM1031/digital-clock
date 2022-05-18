@@ -6,6 +6,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { getWidth, getHeight, isLandscape, getSunPos, getMoonPos, getDateStr, getTimeStr, getTimezoneStr } from './Util.js';
 
 import landModel from './land.glb';
+import cloudsModel from './clouds.glb';
 
 const FRAME_INTERVAL = 100;
 
@@ -79,6 +80,7 @@ class Clock extends Component {
         this.initSun();
         this.initMoon();
         this.initLand();
+        this.initClouds();
         this.initLampLight();
         this.initGodRays();
 
@@ -138,9 +140,8 @@ class Clock extends Component {
     initLand() {
         const group = new THREE.Group();
         const loader = new GLTFLoader();
-        const scene = this.scene;
 
-        loader.load(landModel, function (gltf) {
+        loader.load(landModel, (gltf) => {
             gltf.scene.traverse(function(node) { 
                 if (node instanceof THREE.Mesh) { 
                     node.position.set(0, -1, 0);
@@ -149,7 +150,28 @@ class Clock extends Component {
                 } 
             });
             group.add( gltf.scene );
-            scene.add(group);
+            this.scene.add(group);
+        }, undefined, function (error) {
+            console.error(error);
+        });
+    }
+
+    initClouds() {
+        const group = new THREE.Group();
+        const loader = new GLTFLoader();
+
+        loader.load(cloudsModel, (gltf) => {
+            gltf.scene.traverse(function(node) { 
+                if (node instanceof THREE.Mesh) { 
+                    node.position.set(-3, 8, -2);
+                    node.castShadow = true;
+                    node.receiveShadow = true;
+                } 
+            });
+            group.scale.set(0.3, 0.3, 0.3);
+            group.add( gltf.scene );
+            this.scene.add(group);
+            this.clouds = group;
         }, undefined, function (error) {
             console.error(error);
         });
@@ -219,8 +241,10 @@ class Clock extends Component {
             const tOff = this.tz - date.getTimezoneOffset();
             date.setTime(date.getTime() + tOff * 60000);
         }
-        //date.setTime(date.getTime() + offset);
-        //offset += 100000;
+
+        //if (!this.offset) this.offset = 0;
+        //date.setTime(date.getTime() + this.offset);
+        //this.offset += 100000;
 
         // Atlanta solar eclipse time
         //date.setFullYear(2017, 7, 21);
@@ -230,12 +254,16 @@ class Clock extends Component {
         const width = getWidth();
         const height = getHeight();
 
+        // Clouds movement
+        if (this.clouds)
+            this.clouds.rotation.set(0, date.getTime() % 900000 / 450000 * Math.PI, 0);
+
         // Sun position calculation
         const sunDist = 6;
         const sunPos = getSunPos(date, this.lat, this.lon);
-        const sx = Math.sin(sunPos.azimuth) * sunDist;
+        const sx = Math.sin(sunPos.azimuth) * Math.cos(sunPos.altitude) * sunDist;
         const sy = Math.sin(sunPos.altitude) * sunDist;
-        const sz = -Math.cos(sunPos.azimuth) * sunDist;
+        const sz = -Math.cos(sunPos.azimuth) * Math.cos(sunPos.altitude) * sunDist;
         this.sun.position.set(sx, sy, sz);
 
         // Sun light color & intensity calculation
@@ -246,24 +274,25 @@ class Clock extends Component {
 
         const sunLight = sunMesh.children[0];
         sunLight.color.setRGB(sunRedness, 0.5 - sunRedness/2, 0.33 - sunRedness/2);
-        sunLight.intensity = 5 - Math.min(Math.sin(-sunPos.altitude)*4, 0);
+        sunLight.intensity = Math.max(Math.min(Math.sin(sunPos.altitude + 0.2)*20, 5), 0);
+        console.log(sunLight.intensity)
 
         // Moon position calculation
         const moonDist = 5.4;
         const moonPos = getMoonPos(date, this.lat, this.lon);
-        const mx = Math.sin(moonPos.azimuth) * moonDist;
+        const mx = Math.sin(moonPos.azimuth) * Math.cos(moonPos.altitude) * moonDist;
         const my = Math.sin(moonPos.altitude) * moonDist;
-        const mz = -Math.cos(moonPos.azimuth) * moonDist;
+        const mz = -Math.cos(moonPos.azimuth) * Math.cos(moonPos.altitude) * moonDist;
         this.moon.position.set(mx, my, mz);
 
         // Moon light intensity calculation (based on phase)
         const msV = new THREE.Vector3((sx*1000)-mx, (sy*1000)-my, (sz*1000)-mz);
         const mlV = new THREE.Vector3(mx, my, mz);
-        const moonIllum = Math.max(-msV.normalize().dot(mlV.normalize()) + 1, 0) / 2;
+        const moonIllum = Math.max(-msV.normalize().dot(mlV.normalize()) + 1, 0) * 3;
 
         const moonMesh = this.moon.children[0];
         const moonLight = moonMesh.children[0];
-        moonLight.intensity = Math.max(Math.sin(-sunPos.altitude), 0) * Math.max(Math.sin(moonPos.altitude)) * moonIllum + 0.1;
+        moonLight.intensity = Math.max(Math.sin(-sunPos.altitude), 0) * Math.max(Math.sin(moonPos.altitude)) * moonIllum;
 
         // Moon phase calculation
         const moonCover = moonMesh.children[1];
@@ -274,8 +303,9 @@ class Clock extends Component {
         else this.lampLight.color.setRGB(Math.random()*0.2 + 0.8, 0.4, 0);
 
         // Ambient light calculation
-        const ambientIllum = Math.max(Math.sin(sunPos.altitude), 0) * 0.2 + 0.05;
-        this.ambientLight.color.setRGB(ambientIllum, ambientIllum, ambientIllum);
+        const ambientIllum = Math.max(Math.sin(sunPos.altitude), 0) * 0.4 - 0.2;
+        this.ambientLight.intensity = ambientIllum * 2 + 0.7;
+        this.ambientLight.color.setRGB(0.5 + ambientIllum, 0.5, 0.5 - ambientIllum);
 
         // Time text update
         const landscape = isLandscape();
