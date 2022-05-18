@@ -64,7 +64,7 @@ export default function SectionBG() {
                     icon={action.icon}
                     tooltipTitle={action.name}
                     onClick={() => {
-                        window.location.href = '/main-page/?p=' + (action.key + 1) + '&b=true';
+                        window.location.href = '/digital-clock/?p=' + (action.key + 1) + '&b=true';
                     }}
                 />
             ))}

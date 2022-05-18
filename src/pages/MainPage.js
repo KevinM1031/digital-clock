@@ -60,7 +60,7 @@ export function MainPage() {
     const page = parseInt(queryParams.get('p'));
     if (!page || (page < 100) && (!(page > 0) || !(page <= sectionCount))) {
         //window.location.href = 'https://kevinm1031.github.io/main-page/?p=1';
-        window.location.href = '/main-page/?p=1';
+        window.location.href = '/digital-clock/?p=1';
     }
     
     const handleScroll = () => {
@@ -68,15 +68,15 @@ export function MainPage() {
 
         if (page === 1) {
             if (window.pageYOffset > currHeight * 2.1)
-                window.location.href = '/main-page/?p=' + (page + 1);
+                window.location.href = '/digital-clock/?p=' + (page + 1);
         } else if (page === sectionCount) {
             if (window.pageYOffset < currHeight * 0.1)
-                window.location.href = '/main-page/?p=' + (page - 1) + '&b=true';
+                window.location.href = '/digital-clock/?p=' + (page - 1) + '&b=true';
         } else {
             if (window.pageYOffset < currHeight * 0.1)
-                window.location.href = '/main-page/?p=' + (page - 1) + '&b=true';
+                window.location.href = '/digital-clock/?p=' + (page - 1) + '&b=true';
             else if (window.pageYOffset > currHeight * 3.1)
-                window.location.href = '/main-page/?p=' + (page + 1);
+                window.location.href = '/digital-clock/?p=' + (page + 1);
         }
     };
 
