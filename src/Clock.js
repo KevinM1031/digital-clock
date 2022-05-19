@@ -88,9 +88,13 @@ class Clock extends Component {
     }
 
     initAmbientLight() {
-		const ambientLight = new THREE.AmbientLight( '#222222' );
-		this.scene.add( ambientLight );
+		const light = new THREE.AmbientLight( '#222222' );
+		this.scene.add( light );
+        const ambientLight = new THREE.DirectionalLight('#335599', 0.3);
+        ambientLight.position.set(-40, 10, 20);
+        this.scene.add(ambientLight);
         this.ambientLight = ambientLight;
+
     }
 
     initSun() {
@@ -121,6 +125,7 @@ class Clock extends Component {
 
         const moon_light = new THREE.PointLight( '#444499', 0 );
         moon_light.castShadow = true;
+        moon_light.receiveShadow = true;
         moon_light.shadow.bias = -0.0002;
         moon_light.shadow.mapSize.width = 1400;
         moon_light.shadow.mapSize.height = 1400;
@@ -149,7 +154,12 @@ class Clock extends Component {
                     node.receiveShadow = true;
                 } 
             });
+            //const earth_geo = new THREE.SphereGeometry(0.17, 20, 20);
+            //const earth_mat = new THREE.MeshLambertMaterial({ color: '#ff0000' });
+            //const earth = new THREE.Mesh(earth_geo, earth_mat);
+            //earth.castShadow = true;
             group.add( gltf.scene );
+            //group.add(earth);
             this.scene.add(group);
         }, undefined, function (error) {
             console.error(error);
@@ -250,6 +260,10 @@ class Clock extends Component {
         //date.setFullYear(2017, 7, 21);
         //date.setHours(14, 36, 0);
 
+        // Atlanta lunar eclipse time
+        //date.setFullYear(2022, 4, 16);
+        //date.setHours(1, 36, 0);
+
         // Get screen dimensions
         const width = getWidth();
         const height = getHeight();
@@ -288,7 +302,7 @@ class Clock extends Component {
         // Moon light intensity calculation (based on phase)
         const msV = new THREE.Vector3((sx*1000)-mx, (sy*1000)-my, (sz*1000)-mz);
         const mlV = new THREE.Vector3(mx, my, mz);
-        const moonIllum = Math.max(-msV.normalize().dot(mlV.normalize()) + 1, 0) * 3;
+        const moonIllum = Math.max(-msV.normalize().dot(mlV.normalize()) + 1, 0) * 2.5;
 
         const moonMesh = this.moon.children[0];
         const moonLight = moonMesh.children[0];
@@ -304,7 +318,7 @@ class Clock extends Component {
 
         // Ambient light calculation
         const ambientIllum = Math.max(Math.sin(sunPos.altitude), 0) * 0.4 - 0.2;
-        this.ambientLight.intensity = ambientIllum * 2 + 0.7;
+        this.ambientLight.intensity = ambientIllum * 2 + 0.5;
         this.ambientLight.color.setRGB(0.5 + ambientIllum, 0.5, 0.5 - ambientIllum);
 
         // Time text update
