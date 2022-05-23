@@ -1,7 +1,7 @@
 {
   "homepage": "https://kevinm1031.github.io/digital-clock",
   "name": "digital-clock",
-  "version": "1.1.2",
+  "version": "1.2.1",
   "private": true,
   "dependencies": {
     "postprocessing": "^6.26.3",
