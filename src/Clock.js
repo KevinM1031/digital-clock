@@ -122,6 +122,7 @@ class Clock extends Component {
         const moon_geo = new THREE.SphereGeometry(0.16, 40, 40);
         const moon_mat = new THREE.MeshLambertMaterial({ emissive: '#9999cc' });
         const moon = new THREE.Mesh(moon_geo, moon_mat);
+        moon.castShadow = false;
 
         const moon_light = new THREE.DirectionalLight( '#444499', 0 );
         moon_light.castShadow = true;
@@ -144,43 +145,43 @@ class Clock extends Component {
     initPlanets() {
         const group = new THREE.Group();
 
-        const mercury_geo = new THREE.SphereGeometry(0.01, 5, 5);
+        const mercury_geo = new THREE.SphereGeometry(0.008, 5, 5);
         const mercury_mat = new THREE.MeshLambertMaterial({ emissive: '#f8ffa8' });
         const mercury = new THREE.Mesh(mercury_geo, mercury_mat);
         group.add(mercury);
         this.mercury = mercury;
 
-        const venus_geo = new THREE.SphereGeometry(0.03, 5, 5);
+        const venus_geo = new THREE.SphereGeometry(0.024, 5, 5);
         const venus_mat = new THREE.MeshLambertMaterial({ emissive: '#f5f781' });
         const venus = new THREE.Mesh(venus_geo, venus_mat);
         group.add(venus);
         this.venus = venus;
 
-        const mars_geo = new THREE.SphereGeometry(0.024, 5, 5);
+        const mars_geo = new THREE.SphereGeometry(0.016, 5, 5);
         const mars_mat = new THREE.MeshLambertMaterial({ emissive: '#e36124' });
         const mars = new THREE.Mesh(mars_geo, mars_mat);
         group.add(mars);
         this.mars = mars;
 
-        const jupiter_geo = new THREE.SphereGeometry(0.025, 5, 5);
+        const jupiter_geo = new THREE.SphereGeometry(0.020, 5, 5);
         const jupiter_mat = new THREE.MeshLambertMaterial({ emissive: '#b0aa8f' });
         const jupiter = new THREE.Mesh(jupiter_geo, jupiter_mat);
         group.add(jupiter);
         this.jupiter = jupiter;
 
-        const saturn_geo = new THREE.SphereGeometry(0.018, 5, 5);
+        const saturn_geo = new THREE.SphereGeometry(0.014, 5, 5);
         const saturn_mat = new THREE.MeshLambertMaterial({ emissive: '#c7a477' });
         const saturn = new THREE.Mesh(saturn_geo, saturn_mat);
         group.add(saturn);
         this.saturn = saturn;
 
-        const uranus_geo = new THREE.SphereGeometry(0.012, 5, 5);
+        const uranus_geo = new THREE.SphereGeometry(0.01, 5, 5);
         const uranus_mat = new THREE.MeshLambertMaterial({ emissive: '#72e8f7' });
         const uranus = new THREE.Mesh(uranus_geo, uranus_mat);
         group.add(uranus);
         this.uranus = uranus;
 
-        const neptune_geo = new THREE.SphereGeometry(0.012, 5, 5);
+        const neptune_geo = new THREE.SphereGeometry(0.007, 5, 5);
         const neptune_mat = new THREE.MeshLambertMaterial({ emissive: '#5e78f7' });
         const neptune = new THREE.Mesh(neptune_geo, neptune_mat);
         group.add(neptune);
@@ -192,6 +193,7 @@ class Clock extends Component {
         group.add(pluto);
         this.pluto = pluto;
 
+        group.castShadow = false;
         this.scene.add(group);
     }
 
