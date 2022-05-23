@@ -3,12 +3,13 @@ import * as THREE from 'three';
 import * as POSTPROCESSING from 'postprocessing';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { getWidth, getHeight, isLandscape, getSunPos, getMoonPos, getDateStr, getTimeStr, getTimezoneStr } from './Util.js';
+import { 
+    getWidth, getHeight, isLandscape, getSunPos, getMoonPos, 
+    getDateStr, getTimeStr, getTimezoneStr, getPlanetsPos
+} from './Util.js';
 
 import landModel from './land.glb';
 import cloudsModel from './clouds.glb';
-
-const FRAME_INTERVAL = 100;
 
 class Clock extends Component {
     constructor(props) {
@@ -35,6 +36,9 @@ class Clock extends Component {
         this.date = new Date();
         if (props.tz) this.tz = -1 * props.tz;
 
+        this.delay = 100;
+        this.pov = 3;
+
         window.addEventListener('resize', () => {this.resize()});
     }
 
@@ -46,7 +50,7 @@ class Clock extends Component {
         const width = getWidth();
         const height = getHeight();
 
-        this.camera = new THREE.PerspectiveCamera( 60, width / height, 1, 1000 );
+        this.camera = new THREE.PerspectiveCamera( 60, width / height, 0.01, 100 );
         this.camera.position.set(-9, 4, -4);
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
@@ -70,15 +74,13 @@ class Clock extends Component {
         
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.listenToKeyEvents(this.canvas);
-        this.controls.enableDamping = true;
-        this.controls.dampingFactor = 0.05;
-        this.controls.screenSpacePanning = false;
         this.controls.minDistance = 5;
-        this.controls.maxDistance = 100;
+        this.controls.maxDistance = 20;
 
         this.initAmbientLight();
         this.initSun();
         this.initMoon();
+        this.initPlanets();
         this.initLand();
         this.initClouds();
         this.initLampLight();
@@ -103,14 +105,13 @@ class Clock extends Component {
         const sun_mat = new THREE.MeshLambertMaterial({ emissive: '#ffbb77' });
         const sun = new THREE.Mesh(sun_geo, sun_mat);
 
-        const sun_light = new THREE.PointLight('#775533', 5);
+        const sun_light = new THREE.DirectionalLight('#775533', 5);
         sun_light.castShadow = true;
         sun_light.shadow.bias = -0.0002;
         sun_light.shadow.mapSize.width = 1400;
         sun_light.shadow.mapSize.height = 1400;
         sun.add(sun_light);
 
-        sun.position.set(0, 0, 0);
         group.add(sun);
         this.scene.add(group);
         this.sun = group;
@@ -118,12 +119,11 @@ class Clock extends Component {
 
     initMoon() {
         const group = new THREE.Group();
-        const moon_geo = new THREE.SphereGeometry(0.17, 20, 20);
-        const moon_mat = new THREE.MeshLambertMaterial({ emissive: '#888899' });
+        const moon_geo = new THREE.SphereGeometry(0.16, 40, 40);
+        const moon_mat = new THREE.MeshLambertMaterial({ emissive: '#9999cc' });
         const moon = new THREE.Mesh(moon_geo, moon_mat);
-        moon.castShadow = true;
 
-        const moon_light = new THREE.PointLight( '#444499', 0 );
+        const moon_light = new THREE.DirectionalLight( '#444499', 0 );
         moon_light.castShadow = true;
         moon_light.receiveShadow = true;
         moon_light.shadow.bias = -0.0002;
@@ -131,15 +131,68 @@ class Clock extends Component {
         moon_light.shadow.mapSize.height = 1400;
         moon.add(moon_light);
 
-        const moon_cover_geo = new THREE.SphereGeometry(0.18, 20, 10, Math.PI, Math.PI);
+        const moon_cover_geo = new THREE.SphereGeometry(0.17, 40, 20, Math.PI, Math.PI);
         const moon_cover_mat = new THREE.MeshLambertMaterial({ color: '#000000' });
         const moon_cover = new THREE.Mesh(moon_cover_geo, moon_cover_mat);
         moon.add(moon_cover);
 
-        moon.position.set(0, 0, 0);
         group.add(moon);
         this.scene.add(group);
         this.moon = group;
+    }
+
+    initPlanets() {
+        const group = new THREE.Group();
+
+        const mercury_geo = new THREE.SphereGeometry(0.01, 5, 5);
+        const mercury_mat = new THREE.MeshLambertMaterial({ emissive: '#f8ffa8' });
+        const mercury = new THREE.Mesh(mercury_geo, mercury_mat);
+        group.add(mercury);
+        this.mercury = mercury;
+
+        const venus_geo = new THREE.SphereGeometry(0.03, 5, 5);
+        const venus_mat = new THREE.MeshLambertMaterial({ emissive: '#f5f781' });
+        const venus = new THREE.Mesh(venus_geo, venus_mat);
+        group.add(venus);
+        this.venus = venus;
+
+        const mars_geo = new THREE.SphereGeometry(0.024, 5, 5);
+        const mars_mat = new THREE.MeshLambertMaterial({ emissive: '#e36124' });
+        const mars = new THREE.Mesh(mars_geo, mars_mat);
+        group.add(mars);
+        this.mars = mars;
+
+        const jupiter_geo = new THREE.SphereGeometry(0.025, 5, 5);
+        const jupiter_mat = new THREE.MeshLambertMaterial({ emissive: '#b0aa8f' });
+        const jupiter = new THREE.Mesh(jupiter_geo, jupiter_mat);
+        group.add(jupiter);
+        this.jupiter = jupiter;
+
+        const saturn_geo = new THREE.SphereGeometry(0.018, 5, 5);
+        const saturn_mat = new THREE.MeshLambertMaterial({ emissive: '#c7a477' });
+        const saturn = new THREE.Mesh(saturn_geo, saturn_mat);
+        group.add(saturn);
+        this.saturn = saturn;
+
+        const uranus_geo = new THREE.SphereGeometry(0.012, 5, 5);
+        const uranus_mat = new THREE.MeshLambertMaterial({ emissive: '#72e8f7' });
+        const uranus = new THREE.Mesh(uranus_geo, uranus_mat);
+        group.add(uranus);
+        this.uranus = uranus;
+
+        const neptune_geo = new THREE.SphereGeometry(0.012, 5, 5);
+        const neptune_mat = new THREE.MeshLambertMaterial({ emissive: '#5e78f7' });
+        const neptune = new THREE.Mesh(neptune_geo, neptune_mat);
+        group.add(neptune);
+        this.neptune = neptune;
+
+        const pluto_geo = new THREE.SphereGeometry(0.005, 5, 5);
+        const pluto_mat = new THREE.MeshLambertMaterial({ emissive: '#696361' });
+        const pluto = new THREE.Mesh(pluto_geo, pluto_mat);
+        group.add(pluto);
+        this.pluto = pluto;
+
+        this.scene.add(group);
     }
 
     initLand() {
@@ -154,12 +207,7 @@ class Clock extends Component {
                     node.receiveShadow = true;
                 } 
             });
-            //const earth_geo = new THREE.SphereGeometry(0.17, 20, 20);
-            //const earth_mat = new THREE.MeshLambertMaterial({ color: '#ff0000' });
-            //const earth = new THREE.Mesh(earth_geo, earth_mat);
-            //earth.castShadow = true;
             group.add( gltf.scene );
-            //group.add(earth);
             this.scene.add(group);
         }, undefined, function (error) {
             console.error(error);
@@ -173,7 +221,7 @@ class Clock extends Component {
         loader.load(cloudsModel, (gltf) => {
             gltf.scene.traverse(function(node) { 
                 if (node instanceof THREE.Mesh) { 
-                    node.position.set(-3, 8, -2);
+                    node.position.set(-3.5, 8, -2.5);
                     node.castShadow = true;
                     node.receiveShadow = true;
                 } 
@@ -193,10 +241,10 @@ class Clock extends Component {
         const lamp_mat = new THREE.MeshLambertMaterial({ color: '#000000' });
         const lamp = new THREE.Mesh(lamp_geo, lamp_mat);
 
-        const lamp_light = new THREE.PointLight('#ff5500', 3, 0.8, 1);
+        const lamp_light = new THREE.PointLight('#ff5500', 5, 0.8, 1);
         lamp.add(lamp_light);
 
-        lamp.position.set(-0.63, 0.14, 0.35);
+        lamp.position.set(-0.63, 0.15, 0.35);
         group.add(lamp);
         this.scene.add(group);
         this.lampLight = lamp_light;
@@ -210,16 +258,27 @@ class Clock extends Component {
             weight: 0.9,
             samples: 10
         });
-        let godraysEffect_moon = new POSTPROCESSING.GodRaysEffect(this.camera, this.moon.children[0], {
-            resolutionScale: 0.7,
-            density: 0.2,
-            decay: 0.8,
-            weight: 0.9,
-            samples: 10
-        });
+        let godraysEffect_mercury = new POSTPROCESSING.GodRaysEffect(this.camera, this.mercury, {
+            resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
+        let godraysEffect_venus = new POSTPROCESSING.GodRaysEffect(this.camera, this.venus, {
+            resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
+        let godraysEffect_mars = new POSTPROCESSING.GodRaysEffect(this.camera, this.mars, {
+            resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
+        let godraysEffect_jupiter = new POSTPROCESSING.GodRaysEffect(this.camera, this.jupiter, {
+            resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
+        let godraysEffect_saturn = new POSTPROCESSING.GodRaysEffect(this.camera, this.saturn, {
+            resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
+        let godraysEffect_uranus = new POSTPROCESSING.GodRaysEffect(this.camera, this.uranus, {
+            resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
+        let godraysEffect_neptune = new POSTPROCESSING.GodRaysEffect(this.camera, this.neptune, {
+            resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
+        let godraysEffect_pluto = new POSTPROCESSING.GodRaysEffect(this.camera, this.pluto, {
+            resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
         let smaaEffect = new POSTPROCESSING.SMAAEffect({});
         let renderPass = new POSTPROCESSING.RenderPass(this.scene, this.camera);
-        let effectPass = new POSTPROCESSING.EffectPass(this.camera, godraysEffect_sun, godraysEffect_moon);
+        let effectPass = new POSTPROCESSING.EffectPass(this.camera, 
+            godraysEffect_sun, godraysEffect_mercury, godraysEffect_venus, godraysEffect_mars, godraysEffect_jupiter,
+            godraysEffect_saturn, godraysEffect_uranus, godraysEffect_neptune, godraysEffect_pluto);
         let smaaPass = new POSTPROCESSING.EffectPass(this.camera, smaaEffect);
         this.composer = new POSTPROCESSING.EffectComposer(this.renderer);
         this.composer.addPass(renderPass);
@@ -246,7 +305,6 @@ class Clock extends Component {
 
         // Get date
         let date = new Date();
-
         if (this.tz) {
             const tOff = this.tz - date.getTimezoneOffset();
             date.setTime(date.getTime() + tOff * 60000);
@@ -254,15 +312,7 @@ class Clock extends Component {
 
         //if (!this.offset) this.offset = 0;
         //date.setTime(date.getTime() + this.offset);
-        //this.offset += 100000;
-
-        // Atlanta solar eclipse time
-        //date.setFullYear(2017, 7, 21);
-        //date.setHours(14, 36, 0);
-
-        // Atlanta lunar eclipse time
-        //date.setFullYear(2022, 4, 16);
-        //date.setHours(1, 36, 0);
+        //this.offset += 500000;
 
         // Get screen dimensions
         const width = getWidth();
@@ -289,10 +339,9 @@ class Clock extends Component {
         const sunLight = sunMesh.children[0];
         sunLight.color.setRGB(sunRedness, 0.5 - sunRedness/2, 0.33 - sunRedness/2);
         sunLight.intensity = Math.max(Math.min(Math.sin(sunPos.altitude + 0.2)*20, 5), 0);
-        console.log(sunLight.intensity)
 
         // Moon position calculation
-        const moonDist = 5.4;
+        const moonDist = 5.6;
         const moonPos = getMoonPos(date, this.lat, this.lon);
         const mx = Math.sin(moonPos.azimuth) * Math.cos(moonPos.altitude) * moonDist;
         const my = Math.sin(moonPos.altitude) * moonDist;
@@ -312,13 +361,49 @@ class Clock extends Component {
         const moonCover = moonMesh.children[1];
         moonCover.lookAt((sx*1000), (sy*1000), (sz*1000));
 
+        // Planets position calculation
+        const planetsDist = 6;
+        const planetsPos = getPlanetsPos(date, this.lat, this.lon);
+        this.mercury.position.set(
+            Math.sin(planetsPos.mercury.azimuth) * Math.cos(planetsPos.mercury.altitude) * planetsDist,
+            Math.sin(planetsPos.mercury.altitude) * planetsDist,
+            -Math.cos(planetsPos.mercury.azimuth) * Math.cos(planetsPos.mercury.altitude) * planetsDist);
+        this.venus.position.set(
+            Math.sin(planetsPos.venus.azimuth) * Math.cos(planetsPos.venus.altitude) * planetsDist,
+            Math.sin(planetsPos.venus.altitude) * planetsDist,
+            -Math.cos(planetsPos.venus.azimuth) * Math.cos(planetsPos.venus.altitude) * planetsDist);
+        this.mars.position.set(
+            Math.sin(planetsPos.mars.azimuth) * Math.cos(planetsPos.mars.altitude) * planetsDist,
+            Math.sin(planetsPos.mars.altitude) * planetsDist,
+            -Math.cos(planetsPos.mars.azimuth) * Math.cos(planetsPos.mars.altitude) * planetsDist);
+        this.jupiter.position.set(
+            Math.sin(planetsPos.jupiter.azimuth) * Math.cos(planetsPos.jupiter.altitude) * planetsDist,
+            Math.sin(planetsPos.jupiter.altitude) * planetsDist,
+            -Math.cos(planetsPos.jupiter.azimuth) * Math.cos(planetsPos.jupiter.altitude) * planetsDist);
+        this.saturn.position.set(
+            Math.sin(planetsPos.saturn.azimuth) * Math.cos(planetsPos.saturn.altitude) * planetsDist,
+            Math.sin(planetsPos.saturn.altitude) * planetsDist,
+            -Math.cos(planetsPos.saturn.azimuth) * Math.cos(planetsPos.saturn.altitude) * planetsDist);
+        this.uranus.position.set(
+            Math.sin(planetsPos.uranus.azimuth) * Math.cos(planetsPos.uranus.altitude) * planetsDist,
+            Math.sin(planetsPos.uranus.altitude) * planetsDist,
+            -Math.cos(planetsPos.uranus.azimuth) * Math.cos(planetsPos.uranus.altitude) * planetsDist);
+        this.neptune.position.set(
+            Math.sin(planetsPos.neptune.azimuth) * Math.cos(planetsPos.neptune.altitude) * planetsDist,
+            Math.sin(planetsPos.neptune.altitude) * planetsDist,
+            -Math.cos(planetsPos.neptune.azimuth) * Math.cos(planetsPos.neptune.altitude) * planetsDist);
+        this.pluto.position.set(
+            Math.sin(planetsPos.pluto.azimuth) * Math.cos(planetsPos.pluto.altitude) * planetsDist,
+            Math.sin(planetsPos.pluto.altitude) * planetsDist,
+            -Math.cos(planetsPos.pluto.azimuth) * Math.cos(planetsPos.pluto.altitude) * planetsDist);
+
         // Lamp light calculation (based on civil twilight)
         if (sunPos.altitude > -0.10472) this.lampLight.color.setRGB(0, 0, 0);
         else this.lampLight.color.setRGB(Math.random()*0.2 + 0.8, 0.4, 0);
 
         // Ambient light calculation
         const ambientIllum = Math.max(Math.sin(sunPos.altitude), 0) * 0.4 - 0.2;
-        this.ambientLight.intensity = ambientIllum * 2 + 0.5;
+        this.ambientLight.intensity = ambientIllum * 1.5 + 0.8;
         this.ambientLight.color.setRGB(0.5 + ambientIllum, 0.5, 0.5 - ambientIllum);
 
         // Time text update
@@ -377,6 +462,24 @@ class Clock extends Component {
             + Math.round(moonPos.altitude / Math.PI * 18000) / 100 + ", " 
             + Math.round(moonPos.azimuth / Math.PI * 18000) / 100 + "]");
 
+        // FPS button update
+        const fpsBtn = this.mount.parentElement.children[7];
+        fpsBtn.style.left = width/2 - fpsBtn.clientWidth/2 - timezoneText.clientWidth*0.8 + 'px';
+        fpsBtn.style.top = height * 0.78 - fpsBtn.clientHeight/2 + timezoneText.clientHeight/2 + 'px';
+        fpsBtn.style.color = textColor;
+        fpsBtn.style.border = '2px solid ' + textColor;
+        fpsBtn.style.fontSize = landscape ? '21px' : '14px';
+        fpsBtn.replaceChildren(this.delay === 100 ? '10 FPS' : '40 FPS');
+
+        // POV button update
+        const povBtn = this.mount.parentElement.children[8];
+        povBtn.style.left = width/2 - povBtn.clientWidth/2 + timezoneText.clientWidth*0.8 + 'px';
+        povBtn.style.top = height * 0.78 - povBtn.clientHeight/2 + timezoneText.clientHeight/2 + 'px';
+        povBtn.style.color = textColor;
+        povBtn.style.border = '2px solid ' + textColor;
+        povBtn.style.fontSize = landscape ? '21px' : '14px';
+        povBtn.replaceChildren(this.pov === 1 ? '1st POV' : '3rd POV');
+
         // Coordinate update
         if (!this.posFixed) {
             navigator.geolocation.getCurrentPosition((pos) => {
@@ -388,7 +491,31 @@ class Clock extends Component {
         this.composer.render();
         setTimeout( () => {
             this.frameId = window.requestAnimationFrame(this.animate);
-        }, FRAME_INTERVAL );
+        }, this.delay );
+    }
+
+    updatePerspective() {
+
+        if (this.pov === 3) {
+            this.controls.minDistance = 5;
+            this.controls.maxDistance = 20;
+            this.controls.reset();
+            this.controls.target.set(0, 0, 0);
+
+            this.camera.position.set(-9, 4, -4);
+            
+
+        } else {
+            this.controls.minDistance = 0;
+            this.controls.maxDistance = 0.001;
+            this.controls.reset();
+            this.controls.target.set(-0.9972, 0.1017, 0.395);
+
+            this.camera.position.set(-1, 0.1, 0.4);
+            this.camera.lookAt(2, 2, -5);
+        }
+
+        this.camera.updateProjectionMatrix();
     }
 
     resize() {
@@ -405,48 +532,44 @@ class Clock extends Component {
 
         return (
             <div ref={this.myRef}>
-                <div ref={(mount) => { this.mount = mount }}/>
+                <div style={{position: 'relative'}}
+                    ref={(mount) => { this.mount = mount }}/>
 
                 <div style={{
-                    position: 'absolute', 
-                    color: 'cornflowerblue',
-                    fontFamily: 'monospace', 
                     fontSize: '550%',
                 }}/>
                 
                 <div style={{
-                    position: 'absolute', 
-                    color: 'cornflowerblue',
-                    fontFamily: 'monospace', 
                     fontSize: '300%',
                 }}/>
 
                 <div style={{
-                    position: 'absolute', 
-                    color: 'cornflowerblue',
-                    fontFamily: 'monospace', 
                     fontSize: '270%',
                 }}/>
 
                 <div style={{
-                    position: 'absolute', 
-                    color: 'cornflowerblue',
-                    fontFamily: 'monospace', 
                     fontSize: '120%',
                 }}/>
 
                 <div style={{
-                    position: 'absolute', 
-                    color: 'cornflowerblue',
-                    fontFamily: 'monospace', 
                     fontSize: '120%',
                 }}/>
 
                 <div style={{
-                    position: 'absolute', 
-                    color: 'cornflowerblue',
-                    fontFamily: 'monospace', 
                     fontSize: '120%',
+                }}/>
+
+                <button onClick={() => {
+                    this.delay = this.delay === 100 ? 25 : 100;
+                }} style={{
+                    fontSize: '200%',
+                }}/>
+
+                <button onClick={() => {
+                    this.pov = this.pov === 1 ? 3 : 1;
+                    this.updatePerspective();
+                }}style={{
+                    fontSize: '200%',
                 }}/>
             </div>
         )

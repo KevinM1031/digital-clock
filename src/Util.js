@@ -87,10 +87,10 @@ export function getMoonPos(date, lat, lon) {
     const n = (date.getTime() - 946728000000) / 86400000;
 
     const L = 3.81033301 + 0.229971493746 * n;
-    const g = 2.355548718 + 0.228027144599 * n;
+    const M = 2.355548718 + 0.228027144599 * n;
     const F = 1.6279035 + 0.2308957154 * n;
 
-    const gamma = L + 0.10976376 * Math.sin(g);
+    const gamma = L + 0.10976376 * Math.sin(M);
     const beta = 0.089500484 * Math.sin(F);
     const epsilon = 0.4090999407;
 
@@ -112,5 +112,422 @@ export function getMoonPos(date, lat, lon) {
     return {
         altitude: a,
         azimuth: A,
+    };
+}
+
+function getEarthHEC(n) {
+    const M = 6.240058221 + 0.01720210473 * n;
+    const e = 0.01671	;
+    const Omega = 3.052109623;
+    const omega = 5.027665256;
+    const i = 0;
+    const a_ = 1;
+
+    const v = M + (2*e-1/4*e*e*e)*Math.sin(M) + 5/4*e*e*Math.sin(2*M) + 13/12*e*e*e*Math.sin(3*M);
+    const r = (a_*(1-e*e)) / (1+e*Math.cos(v));
+
+    return {
+        x: r * (Math.cos(Omega)*Math.cos(omega+v) - Math.sin(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        y: r * (Math.sin(Omega)*Math.cos(omega+v) + Math.cos(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        z: r * Math.sin(i)*Math.sin(omega+v),
+    };
+}
+
+function getMercuryPos(n, earth, lat, LST) {
+
+    // calculating equatorial coordinates
+    // from https://www.aa.quae.nl/en/reken/hemelpositie.html#4
+    const M = 3.050748266 + 0.07142440569 * n;
+    const e = 0.20563;
+    const Omega = 0.843535081;
+    const omega = 0.508327145;
+    const i = 0.12226031;
+    const a_ = 0.38710;
+
+    const v = M + (2*e-1/4*e*e*e)*Math.sin(M) + 5/4*e*e*Math.sin(2*M) + 13/12*e*e*e*Math.sin(3*M);
+    const r = (a_*(1-e*e)) / (1+e*Math.cos(v));
+
+    const HEC = {
+        x: r * (Math.cos(Omega)*Math.cos(omega+v) - Math.sin(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        y: r * (Math.sin(Omega)*Math.cos(omega+v) + Math.cos(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        z: r * Math.sin(i)*Math.sin(omega+v),
+    };
+    const GEC = {
+        x: HEC.x - earth.x,
+        y: HEC.y - earth.y,
+        z: HEC.z - earth.z,
+    };
+
+    const Delta = Math.sqrt(GEC.x*GEC.x + GEC.y*GEC.y + GEC.z*GEC.z);
+    const gamma = Math.atan2(GEC.y, GEC.x);
+    const beta = Math.asin(GEC.z / Delta);
+    const epsilon = 0.4090999407;
+
+    const RA = Math.atan2(Math.sin(gamma)*Math.cos(epsilon) - Math.tan(beta)*Math.sin(epsilon), Math.cos(gamma));
+    const delta = Math.asin(Math.sin(beta)*Math.cos(epsilon) + Math.cos(beta)*Math.sin(epsilon)*Math.sin(gamma));
+
+    // converting equatorial coordinates to horizontal coordinates
+    // from http://www.stargazing.net/kepler/altaz.html
+    const H = RA - LST;
+
+    const a = Math.asin(Math.sin(delta) * Math.sin(lat) + Math.cos(delta) * Math.cos(lat) * Math.cos(H));
+    const A0 = Math.acos((Math.sin(delta) - Math.sin(a) * Math.sin(lat)) / (Math.cos(a) * Math.cos(lat)));
+    const A = Math.sin(H) > 0 ? A0 : Math.PI * 2 - A0;
+
+    return {
+        altitude: a,
+        azimuth: A,
+    };
+}
+
+function getVenusPos(n, earth, lat, LST) {
+
+    // calculating equatorial coordinates
+    // from https://www.aa.quae.nl/en/reken/hemelpositie.html#4
+    const M = 0.879925196 + 0.02796254827 * n;
+    const e = 0.00677;
+    const Omega = 1.3383185;
+    const omega = 0.957906507;
+    const i = 0.059253928;
+    const a_ = 0.72333	;
+
+    const v = M + (2*e-1/4*e*e*e)*Math.sin(M) + 5/4*e*e*Math.sin(2*M) + 13/12*e*e*e*Math.sin(3*M);
+    const r = (a_*(1-e*e)) / (1+e*Math.cos(v));
+
+    const HEC = {
+        x: r * (Math.cos(Omega)*Math.cos(omega+v) - Math.sin(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        y: r * (Math.sin(Omega)*Math.cos(omega+v) + Math.cos(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        z: r * Math.sin(i)*Math.sin(omega+v),
+    };
+    const GEC = {
+        x: HEC.x - earth.x,
+        y: HEC.y - earth.y,
+        z: HEC.z - earth.z,
+    };
+
+    const Delta = Math.sqrt(GEC.x*GEC.x + GEC.y*GEC.y + GEC.z*GEC.z);
+    const gamma = Math.atan2(GEC.y, GEC.x);
+    const beta = Math.asin(GEC.z / Delta);
+    const epsilon = 0.4090999407;
+
+    const RA = Math.atan2(Math.sin(gamma)*Math.cos(epsilon) - Math.tan(beta)*Math.sin(epsilon), Math.cos(gamma));
+    const delta = Math.asin(Math.sin(beta)*Math.cos(epsilon) + Math.cos(beta)*Math.sin(epsilon)*Math.sin(gamma));
+
+    // converting equatorial coordinates to horizontal coordinates
+    // from http://www.stargazing.net/kepler/altaz.html
+    const H = RA - LST;
+
+    const a = Math.asin(Math.sin(delta) * Math.sin(lat) + Math.cos(delta) * Math.cos(lat) * Math.cos(H));
+    const A0 = Math.acos((Math.sin(delta) - Math.sin(a) * Math.sin(lat)) / (Math.cos(a) * Math.cos(lat)));
+    const A = Math.sin(H) > 0 ? A0 : Math.PI * 2 - A0;
+
+    return {
+        altitude: a,
+        azimuth: A,
+    };
+}
+
+function getMarsPos(n, earth, lat, LST) {
+
+    // calculating equatorial coordinates
+    // from https://www.aa.quae.nl/en/reken/hemelpositie.html#4
+    const M = 0.338122636 + 0.00914620596 * n;
+    const e = 0.09340;
+    const Omega = 0.864950271;
+    const omega = 5.000403214;
+    const i = 0.03228859;
+    const a_ = 1.52368;
+
+    const v = M + (2*e-1/4*e*e*e)*Math.sin(M) + 5/4*e*e*Math.sin(2*M) + 13/12*e*e*e*Math.sin(3*M);
+    const r = (a_*(1-e*e)) / (1+e*Math.cos(v));
+
+    const HEC = {
+        x: r * (Math.cos(Omega)*Math.cos(omega+v) - Math.sin(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        y: r * (Math.sin(Omega)*Math.cos(omega+v) + Math.cos(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        z: r * Math.sin(i)*Math.sin(omega+v),
+    };
+    const GEC = {
+        x: HEC.x - earth.x,
+        y: HEC.y - earth.y,
+        z: HEC.z - earth.z,
+    };
+
+    const Delta = Math.sqrt(GEC.x*GEC.x + GEC.y*GEC.y + GEC.z*GEC.z);
+    const gamma = Math.atan2(GEC.y, GEC.x);
+    const beta = Math.asin(GEC.z / Delta);
+    const epsilon = 0.4090999407;
+
+    const RA = Math.atan2(Math.sin(gamma)*Math.cos(epsilon) - Math.tan(beta)*Math.sin(epsilon), Math.cos(gamma));
+    const delta = Math.asin(Math.sin(beta)*Math.cos(epsilon) + Math.cos(beta)*Math.sin(epsilon)*Math.sin(gamma));
+
+    // converting equatorial coordinates to horizontal coordinates
+    // from http://www.stargazing.net/kepler/altaz.html
+    const H = RA - LST;
+
+    const a = Math.asin(Math.sin(delta) * Math.sin(lat) + Math.cos(delta) * Math.cos(lat) * Math.cos(H));
+    const A0 = Math.acos((Math.sin(delta) - Math.sin(a) * Math.sin(lat)) / (Math.cos(a) * Math.cos(lat)));
+    const A = Math.sin(H) > 0 ? A0 : Math.PI * 2 - A0;
+
+    return {
+        altitude: a,
+        azimuth: A,
+    };
+}
+
+function getJupiterPos(n, earth, lat, LST) {
+
+    // calculating equatorial coordinates
+    // from https://www.aa.quae.nl/en/reken/hemelpositie.html#4
+    const M = 0.34941492 + 0.00144960066 * n;
+    const e = 0.04849;
+    const Omega = 1.75342758;
+    const omega = 4.7798808625;
+    const i = 0.02274164;
+    const a_ = 5.20260;
+
+    const v = M + (2*e-1/4*e*e*e)*Math.sin(M) + 5/4*e*e*Math.sin(2*M) + 13/12*e*e*e*Math.sin(3*M);
+    const r = (a_*(1-e*e)) / (1+e*Math.cos(v));
+
+    const HEC = {
+        x: r * (Math.cos(Omega)*Math.cos(omega+v) - Math.sin(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        y: r * (Math.sin(Omega)*Math.cos(omega+v) + Math.cos(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        z: r * Math.sin(i)*Math.sin(omega+v),
+    };
+    const GEC = {
+        x: HEC.x - earth.x,
+        y: HEC.y - earth.y,
+        z: HEC.z - earth.z,
+    };
+
+    const Delta = Math.sqrt(GEC.x*GEC.x + GEC.y*GEC.y + GEC.z*GEC.z);
+    const gamma = Math.atan2(GEC.y, GEC.x);
+    const beta = Math.asin(GEC.z / Delta);
+    const epsilon = 0.4090999407;
+
+    const RA = Math.atan2(Math.sin(gamma)*Math.cos(epsilon) - Math.tan(beta)*Math.sin(epsilon), Math.cos(gamma));
+    const delta = Math.asin(Math.sin(beta)*Math.cos(epsilon) + Math.cos(beta)*Math.sin(epsilon)*Math.sin(gamma));
+
+    // converting equatorial coordinates to horizontal coordinates
+    // from http://www.stargazing.net/kepler/altaz.html
+    const H = RA - LST;
+
+    const a = Math.asin(Math.sin(delta) * Math.sin(lat) + Math.cos(delta) * Math.cos(lat) * Math.cos(H));
+    const A0 = Math.acos((Math.sin(delta) - Math.sin(a) * Math.sin(lat)) / (Math.cos(a) * Math.cos(lat)));
+    const A = Math.sin(H) > 0 ? A0 : Math.PI * 2 - A0;
+
+    return {
+        altitude: a,
+        azimuth: A,
+    };
+}
+
+function getSaturnPos(n, earth, lat, LST) {
+
+    // calculating equatorial coordinates
+    // from https://www.aa.quae.nl/en/reken/hemelpositie.html#4
+    const M = 5.533060248 + 0.00058243382 * n;
+    const e = 0.05551;
+    const Omega = 1.983845948;
+    const omega = 5.923490402;
+    const i = 0.043441245;
+    const a_ = 9.55491	;
+
+    const v = M + (2*e-1/4*e*e*e)*Math.sin(M) + 5/4*e*e*Math.sin(2*M) + 13/12*e*e*e*Math.sin(3*M);
+    const r = (a_*(1-e*e)) / (1+e*Math.cos(v));
+
+    const HEC = {
+        x: r * (Math.cos(Omega)*Math.cos(omega+v) - Math.sin(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        y: r * (Math.sin(Omega)*Math.cos(omega+v) + Math.cos(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        z: r * Math.sin(i)*Math.sin(omega+v),
+    };
+    const GEC = {
+        x: HEC.x - earth.x,
+        y: HEC.y - earth.y,
+        z: HEC.z - earth.z,
+    };
+
+    const Delta = Math.sqrt(GEC.x*GEC.x + GEC.y*GEC.y + GEC.z*GEC.z);
+    const gamma = Math.atan2(GEC.y, GEC.x);
+    const beta = Math.asin(GEC.z / Delta);
+    const epsilon = 0.4090999407;
+
+    const RA = Math.atan2(Math.sin(gamma)*Math.cos(epsilon) - Math.tan(beta)*Math.sin(epsilon), Math.cos(gamma));
+    const delta = Math.asin(Math.sin(beta)*Math.cos(epsilon) + Math.cos(beta)*Math.sin(epsilon)*Math.sin(gamma));
+
+    // converting equatorial coordinates to horizontal coordinates
+    // from http://www.stargazing.net/kepler/altaz.html
+    const H = RA - LST;
+
+    const a = Math.asin(Math.sin(delta) * Math.sin(lat) + Math.cos(delta) * Math.cos(lat) * Math.cos(H));
+    const A0 = Math.acos((Math.sin(delta) - Math.sin(a) * Math.sin(lat)) / (Math.cos(a) * Math.cos(lat)));
+    const A = Math.sin(H) > 0 ? A0 : Math.PI * 2 - A0;
+
+    return {
+        altitude: a,
+        azimuth: A,
+    };
+}
+
+function getUranusPos(n, earth, lat, LST) {
+
+    // calculating equatorial coordinates
+    // from https://www.aa.quae.nl/en/reken/hemelpositie.html#4
+    const M = 2.46178691 + 0.0002041686 * n;
+    const e = 0.04630;
+    const Omega = 1.29164837;
+    const omega = 1.72785851;
+    const i = 0.013491395;
+    const a_ = 	19.21845;
+
+    const v = M + (2*e-1/4*e*e*e)*Math.sin(M) + 5/4*e*e*Math.sin(2*M) + 13/12*e*e*e*Math.sin(3*M);
+    const r = (a_*(1-e*e)) / (1+e*Math.cos(v));
+
+    const HEC = {
+        x: r * (Math.cos(Omega)*Math.cos(omega+v) - Math.sin(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        y: r * (Math.sin(Omega)*Math.cos(omega+v) + Math.cos(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        z: r * Math.sin(i)*Math.sin(omega+v),
+    };
+    const GEC = {
+        x: HEC.x - earth.x,
+        y: HEC.y - earth.y,
+        z: HEC.z - earth.z,
+    };
+
+    const Delta = Math.sqrt(GEC.x*GEC.x + GEC.y*GEC.y + GEC.z*GEC.z);
+    const gamma = Math.atan2(GEC.y, GEC.x);
+    const beta = Math.asin(GEC.z / Delta);
+    const epsilon = 0.4090999407;
+
+    const RA = Math.atan2(Math.sin(gamma)*Math.cos(epsilon) - Math.tan(beta)*Math.sin(epsilon), Math.cos(gamma));
+    const delta = Math.asin(Math.sin(beta)*Math.cos(epsilon) + Math.cos(beta)*Math.sin(epsilon)*Math.sin(gamma));
+
+    // converting equatorial coordinates to horizontal coordinates
+    // from http://www.stargazing.net/kepler/altaz.html
+    const H = RA - LST;
+
+    const a = Math.asin(Math.sin(delta) * Math.sin(lat) + Math.cos(delta) * Math.cos(lat) * Math.cos(H));
+    const A0 = Math.acos((Math.sin(delta) - Math.sin(a) * Math.sin(lat)) / (Math.cos(a) * Math.cos(lat)));
+    const A = Math.sin(H) > 0 ? A0 : Math.PI * 2 - A0;
+
+    return {
+        altitude: a,
+        azimuth: A,
+    };
+}
+
+function getNeptunePos(n, earth, lat, LST) {
+
+    // calculating equatorial coordinates
+    // from https://www.aa.quae.nl/en/reken/hemelpositie.html#4
+    const M = 4.471969876 + 0.00010410889 * n;
+    const e = 0.00899;
+    const Omega = 2.300064701;
+    const omega = 4.82304285;
+    const i = 0.03089233;
+    const a_ = 30.11039;
+
+    const v = M + (2*e-1/4*e*e*e)*Math.sin(M) + 5/4*e*e*Math.sin(2*M) + 13/12*e*e*e*Math.sin(3*M);
+    const r = (a_*(1-e*e)) / (1+e*Math.cos(v));
+
+    const HEC = {
+        x: r * (Math.cos(Omega)*Math.cos(omega+v) - Math.sin(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        y: r * (Math.sin(Omega)*Math.cos(omega+v) + Math.cos(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        z: r * Math.sin(i)*Math.sin(omega+v),
+    };
+    const GEC = {
+        x: HEC.x - earth.x,
+        y: HEC.y - earth.y,
+        z: HEC.z - earth.z,
+    };
+
+    const Delta = Math.sqrt(GEC.x*GEC.x + GEC.y*GEC.y + GEC.z*GEC.z);
+    const gamma = Math.atan2(GEC.y, GEC.x);
+    const beta = Math.asin(GEC.z / Delta);
+    const epsilon = 0.4090999407;
+
+    const RA = Math.atan2(Math.sin(gamma)*Math.cos(epsilon) - Math.tan(beta)*Math.sin(epsilon), Math.cos(gamma));
+    const delta = Math.asin(Math.sin(beta)*Math.cos(epsilon) + Math.cos(beta)*Math.sin(epsilon)*Math.sin(gamma));
+
+    // converting equatorial coordinates to horizontal coordinates
+    // from http://www.stargazing.net/kepler/altaz.html
+    const H = RA - LST;
+
+    const a = Math.asin(Math.sin(delta) * Math.sin(lat) + Math.cos(delta) * Math.cos(lat) * Math.cos(H));
+    const A0 = Math.acos((Math.sin(delta) - Math.sin(a) * Math.sin(lat)) / (Math.cos(a) * Math.cos(lat)));
+    const A = Math.sin(H) > 0 ? A0 : Math.PI * 2 - A0;
+
+    return {
+        altitude: a,
+        azimuth: A,
+    };
+}
+
+function getPlutoPos(n, earth, lat, LST) {
+
+    // calculating equatorial coordinates
+    // from https://www.aa.quae.nl/en/reken/hemelpositie.html#4
+    const M = 0.259739899 + 0.0000691849 * n;
+    const e = 0.2490;
+    const Omega = 1.925220338;
+    const omega = 1.9856261834;
+    const i = 0.29914943;
+    const a_ = 39.543;
+
+    const v = M + (2*e-1/4*e*e*e)*Math.sin(M) + 5/4*e*e*Math.sin(2*M) + 13/12*e*e*e*Math.sin(3*M);
+    const r = (a_*(1-e*e)) / (1+e*Math.cos(v));
+
+    const HEC = {
+        x: r * (Math.cos(Omega)*Math.cos(omega+v) - Math.sin(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        y: r * (Math.sin(Omega)*Math.cos(omega+v) + Math.cos(Omega)*Math.cos(i)*Math.sin(omega+v)),
+        z: r * Math.sin(i)*Math.sin(omega+v),
+    };
+    const GEC = {
+        x: HEC.x - earth.x,
+        y: HEC.y - earth.y,
+        z: HEC.z - earth.z,
+    };
+
+    const Delta = Math.sqrt(GEC.x*GEC.x + GEC.y*GEC.y + GEC.z*GEC.z);
+    const gamma = Math.atan2(GEC.y, GEC.x);
+    const beta = Math.asin(GEC.z / Delta);
+    const epsilon = 0.4090999407;
+
+    const RA = Math.atan2(Math.sin(gamma)*Math.cos(epsilon) - Math.tan(beta)*Math.sin(epsilon), Math.cos(gamma));
+    const delta = Math.asin(Math.sin(beta)*Math.cos(epsilon) + Math.cos(beta)*Math.sin(epsilon)*Math.sin(gamma));
+
+    // converting equatorial coordinates to horizontal coordinates
+    // from http://www.stargazing.net/kepler/altaz.html
+    const H = RA - LST;
+
+    const a = Math.asin(Math.sin(delta) * Math.sin(lat) + Math.cos(delta) * Math.cos(lat) * Math.cos(H));
+    const A0 = Math.acos((Math.sin(delta) - Math.sin(a) * Math.sin(lat)) / (Math.cos(a) * Math.cos(lat)));
+    const A = Math.sin(H) > 0 ? A0 : Math.PI * 2 - A0;
+
+    return {
+        altitude: a,
+        azimuth: A,
+    };
+}
+
+export function getPlanetsPos(date, lat, lon) {
+    lat = lat / 180 * Math.PI;
+    const n = (date.getTime() - 946728000000) / 86400000;
+
+    const UTC_hours = date.getUTCHours() + date.getUTCMinutes()/60 + date.getUTCSeconds()/3600;
+    const LST = (100.46 + 0.985647332 * n + lon + 15 * UTC_hours) % 360 / 180 * Math.PI;
+    
+    const earthHEC = getEarthHEC(n);
+    
+    const mercury = getMercuryPos(n, earthHEC, lat, LST); 
+    const venus = getVenusPos(n, earthHEC, lat, LST); 
+    const mars = getMarsPos(n, earthHEC, lat, LST); 
+    const jupiter = getJupiterPos(n, earthHEC, lat, LST); 
+    const saturn = getSaturnPos(n, earthHEC, lat, LST); 
+    const uranus = getUranusPos(n, earthHEC, lat, LST); 
+    const neptune = getNeptunePos(n, earthHEC, lat, LST); 
+    const pluto = getPlutoPos(n, earthHEC, lat, LST); 
+
+    return {
+        mercury, venus, mars, jupiter, saturn, uranus, neptune, pluto
     };
 }
