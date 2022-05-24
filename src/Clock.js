@@ -547,7 +547,7 @@ class Clock extends Component {
             this.controls.target.set(-0.9972, 0.1017, 0.395);
 
             this.camera.position.set(-1, 0.1, 0.4);
-            this.camera.lookAt(0, 2, 0);
+            this.camera.lookAt(2, 2, -5);
         }
 
         this.camera.updateProjectionMatrix();
