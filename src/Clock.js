@@ -5,7 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { 
     getWidth, getHeight, isLandscape, getSunPos, getMoonPos, 
-    getDateStr, getTimeStr, getTimezoneStr, getPlanetsPos
+    getDateStr, getTimeStr, getTimezoneStr, getPlanetsPos, getISSPos
 } from './Util.js';
 
 import landModel from './land.glb';
@@ -33,9 +33,10 @@ class Clock extends Component {
             });
         }
 
-        this.date = new Date();
-        if (props.tz) this.tz = -1 * props.tz;
+        const date = new Date();
+        this.nextISSTrack = date.getTime() + 100;
 
+        if (props.tz) this.tz = -1 * props.tz;
         this.delay = 100;
         this.pov = 3;
 
@@ -75,12 +76,13 @@ class Clock extends Component {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.listenToKeyEvents(this.canvas);
         this.controls.minDistance = 5;
-        this.controls.maxDistance = 20;
+        this.controls.maxDistance = 50;
 
         this.initAmbientLight();
         this.initSun();
         this.initMoon();
         this.initPlanets();
+        this.initSatellites();
         this.initLand();
         this.initClouds();
         this.initLampLight();
@@ -120,9 +122,8 @@ class Clock extends Component {
     initMoon() {
         const group = new THREE.Group();
         const moon_geo = new THREE.SphereGeometry(0.16, 40, 40);
-        const moon_mat = new THREE.MeshLambertMaterial({ emissive: '#9999cc' });
+        const moon_mat = new THREE.MeshBasicMaterial({ emissive: '#9999cc' });
         const moon = new THREE.Mesh(moon_geo, moon_mat);
-        moon.castShadow = false;
 
         const moon_light = new THREE.DirectionalLight( '#444499', 0 );
         moon_light.castShadow = true;
@@ -132,8 +133,8 @@ class Clock extends Component {
         moon_light.shadow.mapSize.height = 1400;
         moon.add(moon_light);
 
-        const moon_cover_geo = new THREE.SphereGeometry(0.17, 40, 20, Math.PI, Math.PI);
-        const moon_cover_mat = new THREE.MeshLambertMaterial({ color: '#000000' });
+        const moon_cover_geo = new THREE.SphereGeometry(0.165, 40, 20, Math.PI, Math.PI);
+        const moon_cover_mat = new THREE.MeshBasicMaterial({ color: '#000000' });
         const moon_cover = new THREE.Mesh(moon_cover_geo, moon_cover_mat);
         moon.add(moon_cover);
 
@@ -145,53 +146,66 @@ class Clock extends Component {
     initPlanets() {
         const group = new THREE.Group();
 
-        const mercury_geo = new THREE.SphereGeometry(0.008, 5, 5);
+        const mercury_geo = new THREE.SphereGeometry(0.008, 10, 10);
         const mercury_mat = new THREE.MeshLambertMaterial({ emissive: '#f8ffa8' });
         const mercury = new THREE.Mesh(mercury_geo, mercury_mat);
         group.add(mercury);
         this.mercury = mercury;
 
-        const venus_geo = new THREE.SphereGeometry(0.024, 5, 5);
+        const venus_geo = new THREE.SphereGeometry(0.024, 10, 10);
         const venus_mat = new THREE.MeshLambertMaterial({ emissive: '#f5f781' });
         const venus = new THREE.Mesh(venus_geo, venus_mat);
         group.add(venus);
         this.venus = venus;
 
-        const mars_geo = new THREE.SphereGeometry(0.016, 5, 5);
+        const mars_geo = new THREE.SphereGeometry(0.016, 10, 10);
         const mars_mat = new THREE.MeshLambertMaterial({ emissive: '#e36124' });
         const mars = new THREE.Mesh(mars_geo, mars_mat);
         group.add(mars);
         this.mars = mars;
 
-        const jupiter_geo = new THREE.SphereGeometry(0.020, 5, 5);
+        const jupiter_geo = new THREE.SphereGeometry(0.020, 10, 10);
         const jupiter_mat = new THREE.MeshLambertMaterial({ emissive: '#b0aa8f' });
         const jupiter = new THREE.Mesh(jupiter_geo, jupiter_mat);
         group.add(jupiter);
         this.jupiter = jupiter;
 
-        const saturn_geo = new THREE.SphereGeometry(0.014, 5, 5);
+        const saturn_geo = new THREE.SphereGeometry(0.014, 10, 10);
         const saturn_mat = new THREE.MeshLambertMaterial({ emissive: '#c7a477' });
         const saturn = new THREE.Mesh(saturn_geo, saturn_mat);
         group.add(saturn);
         this.saturn = saturn;
 
-        const uranus_geo = new THREE.SphereGeometry(0.01, 5, 5);
+        const uranus_geo = new THREE.SphereGeometry(0.01, 10, 10);
         const uranus_mat = new THREE.MeshLambertMaterial({ emissive: '#72e8f7' });
         const uranus = new THREE.Mesh(uranus_geo, uranus_mat);
         group.add(uranus);
         this.uranus = uranus;
 
-        const neptune_geo = new THREE.SphereGeometry(0.007, 5, 5);
+        const neptune_geo = new THREE.SphereGeometry(0.007, 10, 10);
         const neptune_mat = new THREE.MeshLambertMaterial({ emissive: '#5e78f7' });
         const neptune = new THREE.Mesh(neptune_geo, neptune_mat);
         group.add(neptune);
         this.neptune = neptune;
 
-        const pluto_geo = new THREE.SphereGeometry(0.005, 5, 5);
+        const pluto_geo = new THREE.SphereGeometry(0.005, 10, 10);
         const pluto_mat = new THREE.MeshLambertMaterial({ emissive: '#696361' });
         const pluto = new THREE.Mesh(pluto_geo, pluto_mat);
         group.add(pluto);
         this.pluto = pluto;
+
+        group.castShadow = false;
+        this.scene.add(group);
+    }
+
+    initSatellites() {
+        const group = new THREE.Group();
+
+        const iss_geo = new THREE.SphereGeometry(0.02, 10, 10);
+        const iss_mat = new THREE.MeshLambertMaterial({ color: '#212636', emissive: '#ff0000' });
+        const iss = new THREE.Mesh(iss_geo, iss_mat);
+        group.add(iss);
+        this.iss = iss;
 
         group.castShadow = false;
         this.scene.add(group);
@@ -276,11 +290,14 @@ class Clock extends Component {
             resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
         let godraysEffect_pluto = new POSTPROCESSING.GodRaysEffect(this.camera, this.pluto, {
             resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
+        let godraysEffect_iss = new POSTPROCESSING.GodRaysEffect(this.camera, this.iss, {
+            resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
         let smaaEffect = new POSTPROCESSING.SMAAEffect({});
         let renderPass = new POSTPROCESSING.RenderPass(this.scene, this.camera);
         let effectPass = new POSTPROCESSING.EffectPass(this.camera, 
-            godraysEffect_sun, godraysEffect_mercury, godraysEffect_venus, godraysEffect_mars, godraysEffect_jupiter,
-            godraysEffect_saturn, godraysEffect_uranus, godraysEffect_neptune, godraysEffect_pluto);
+            godraysEffect_sun, godraysEffect_mercury, godraysEffect_venus, godraysEffect_mars, 
+            godraysEffect_jupiter, godraysEffect_saturn, godraysEffect_uranus, godraysEffect_neptune, 
+            godraysEffect_pluto, godraysEffect_iss);
         let smaaPass = new POSTPROCESSING.EffectPass(this.camera, smaaEffect);
         this.composer = new POSTPROCESSING.EffectComposer(this.renderer);
         this.composer.addPass(renderPass);
@@ -399,6 +416,22 @@ class Clock extends Component {
             Math.sin(planetsPos.pluto.altitude) * planetsDist,
             -Math.cos(planetsPos.pluto.azimuth) * Math.cos(planetsPos.pluto.altitude) * planetsDist);
 
+        // Satellite position calculation
+        const satellitesDist = 5.4
+        const satelliteUpdateFreq = 2000;
+        if (this.nextISSTrack <= date.getTime()) {
+            this.nextISSTrack = date.getTime() + satelliteUpdateFreq;
+            getISSPos(date, this.lat, this.lon).then((issPos) => {
+                this.iss.material.emissive.set('#ff0000');
+                this.iss.position.set(
+                    Math.sin(issPos.azimuth) * Math.cos(issPos.altitude) * satellitesDist,
+                    Math.sin(issPos.altitude) * satellitesDist,
+                    -Math.cos(issPos.azimuth) * Math.cos(issPos.altitude) * satellitesDist);
+            });
+        } else if(this.nextISSTrack - satelliteUpdateFreq/2 <= date.getTime()) {
+            this.iss.material.emissive.set('#000000');
+        }
+
         // Lamp light calculation (based on civil twilight)
         if (sunPos.altitude > -0.10472) this.lampLight.color.setRGB(0, 0, 0);
         else this.lampLight.color.setRGB(Math.random()*0.2 + 0.8, 0.4, 0);
@@ -500,7 +533,7 @@ class Clock extends Component {
 
         if (this.pov === 3) {
             this.controls.minDistance = 5;
-            this.controls.maxDistance = 20;
+            this.controls.maxDistance = 50;
             this.controls.reset();
             this.controls.target.set(0, 0, 0);
 
@@ -514,7 +547,7 @@ class Clock extends Component {
             this.controls.target.set(-0.9972, 0.1017, 0.395);
 
             this.camera.position.set(-1, 0.1, 0.4);
-            this.camera.lookAt(2, 2, -5);
+            this.camera.lookAt(0, 2, 0);
         }
 
         this.camera.updateProjectionMatrix();

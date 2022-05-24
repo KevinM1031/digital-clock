@@ -531,3 +531,29 @@ export function getPlanetsPos(date, lat, lon) {
         mercury, venus, mars, jupiter, saturn, uranus, neptune, pluto
     };
 }
+
+export async function getISSPos(date, lat, lon) {
+    lat = lat / 180 * Math.PI;
+    lon = lon / 180 * Math.PI;
+    const r = 6371;
+
+    // Getting ISS position data and calculating altitude and azimuth
+    // from https://ieiuniumlux.github.io/ISSOT/
+    const url = 'https://api.wheretheiss.at/v1/satellites/25544';
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const iLat = data.latitude / 180 * Math.PI;
+    const iLon = data.longitude / 180 * Math.PI;
+    const iR = r + data.altitude;
+
+    const gamma = Math.acos(Math.sin(lat) * Math.sin(iLat) + Math.cos(lat) * Math.cos(iLat) * Math.cos(lon - iLon));
+    const d = Math.sqrt((1 + Math.pow((r / iR), 2)) - (2 * (r / iR) * Math.cos(gamma)));
+
+    return {
+        altitude: Math.acos(Math.sin(gamma) / d) * ((d > 0.34) ? -1 : 1),
+        azimuth: Math.atan2(
+            Math.sin(iLon - lon) * Math.cos(iLat), 
+            Math.cos(lat) * Math.sin(iLat) - Math.sin(lat) * Math.cos(iLat) * Math.cos(iLon - lon)),
+    };
+}
