@@ -1,5 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+    <configuration>
+        <system.webServer>
+            <httpProtocol>
+                <customHeaders>
+                    <add name="Access-Control-Allow-Origin" value="*" />
+                </customHeaders>
+            </httpProtocol>
+        </system.webServer>
+    </configuration>
 <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />

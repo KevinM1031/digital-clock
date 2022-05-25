@@ -6,7 +6,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { 
     getWidth, getHeight, isLandscape, getSunPos, getMoonPos, 
     getDateStr, getTimeStr, getTimezoneStr, getPlanetsPos,
-    getISSPos, getHSTPos, getCXOPos, getVanguard1Pos
+    getISSPos/*, getHSTPos, getCXOPos, getVanguard1Pos*/
 } from './Util.js';
 
 import landModel from './land.glb';
@@ -200,13 +200,13 @@ class Clock extends Component {
     initSatellites() {
         const date = new Date();
         this.nextISSTrack = date.getTime() + 100;
-        this.nextHSTTrack = date.getTime() + 100;
-        this.nextCXOTrack = date.getTime() + 100;
-        this.nextVanguard1Track = date.getTime() + 100;
+        //this.nextHSTTrack = date.getTime() + 100;
+        //this.nextCXOTrack = date.getTime() + 100;
+        //this.nextVanguard1Track = date.getTime() + 100;
         this.issPos = {altitude: 0, azimuth: 0};
-        this.hstPos = {altitude: 0, azimuth: 0};
-        this.cxoPos = {altitude: 0, azimuth: 0};
-        this.vanguard1Pos = {altitude: 0, azimuth: 0};
+        //this.hstPos = {altitude: 0, azimuth: 0};
+        //this.cxoPos = {altitude: 0, azimuth: 0};
+        //this.vanguard1Pos = {altitude: 0, azimuth: 0};
 
         const group = new THREE.Group();
 
@@ -220,6 +220,7 @@ class Clock extends Component {
         const iss_cover = new THREE.Mesh(iss_cover_geo, iss_cover_mat);
         iss.add(iss_cover);
 
+        /*
         const hst_geo = new THREE.SphereGeometry(0.012, 10, 10);
         const hst_mat = new THREE.MeshLambertMaterial({ color: '#212636', emhstive: '#ff0000' });
         const hst = new THREE.Mesh(hst_geo, hst_mat);
@@ -249,6 +250,7 @@ class Clock extends Component {
         const vanguard1_cover_mat = new THREE.MeshBasicMaterial({ color: '#000000' });
         const vanguard1_cover = new THREE.Mesh(vanguard1_cover_geo, vanguard1_cover_mat);
         vanguard1.add(vanguard1_cover);
+        */
 
         group.castShadow = false;
         group.receiveShadow = false;
@@ -468,7 +470,7 @@ class Clock extends Component {
             this.nextISSTrack = date.getTime() + issUpdateFreq;
             getISSPos(this.lat, this.lon).then((pos) => {
                 this.issPos = pos;
-                this.iss.material.emissive.set('#00ff00');
+                this.iss.material.emissive.set('#ff0000');
                 this.iss.position.set(
                     Math.sin(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist,
                     Math.sin(pos.altitude) * satellitesDist,
@@ -479,6 +481,7 @@ class Clock extends Component {
             this.iss.material.emissive.set('#ffffff');
         }
 
+        /*
         // HST position calculation
         const hstUpdateFreq = 10000;
         if (this.nextHSTTrack <= date.getTime()) {
@@ -519,7 +522,7 @@ class Clock extends Component {
             this.nextVanguard1Track = date.getTime() + vanguard1UpdateFreq;
             getVanguard1Pos(this.lat, this.lon).then((pos) => {
                 this.vanguard1Pos = pos;
-                this.vanguard1.material.emissive.set('#ff0000');
+                this.vanguard1.material.emissive.set('#00ff00');
                 this.vanguard1.position.set(
                     Math.sin(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist,
                     Math.sin(pos.altitude) * satellitesDist,
@@ -529,6 +532,7 @@ class Clock extends Component {
         } else if(this.nextVanguard1Track - vanguard1UpdateFreq/2 <= date.getTime()) {
             this.vanguard1.material.emissive.set('#ffffff');
         }
+        */
 
         // Lamp light calculation (based on civil twilight)
         if (sunPos.altitude > -0.10472) this.lampLight.color.setRGB(0, 0, 0);
@@ -687,6 +691,7 @@ class Clock extends Component {
                 + Math.round(this.issPos.altitude / Math.PI * 18000) / 100 + ", " 
                 + Math.round(this.issPos.azimuth / Math.PI * 18000) / 100 + "]");
 
+            /*
             const hstPosText = this.mount.parentElement.children[16];
             hstPosText.style.right = (landscape ? 30 : width/2 - hstPosText.clientWidth/2) + 'px';
             hstPosText.style.top = height * (0.36 - (landscape ? 0.3 : 0)) + 'px';
@@ -716,6 +721,7 @@ class Clock extends Component {
             vanguard1PosText.replaceChildren("Vanguard 1 Alt/Az [" 
                 + Math.round(this.vanguard1Pos.altitude / Math.PI * 18000) / 100 + ", " 
                 + Math.round(this.vanguard1Pos.azimuth / Math.PI * 18000) / 100 + "]");
+            */
         } else {
             const mercuryPosText = this.mount.parentElement.children[7];
             mercuryPosText.replaceChildren("");
@@ -735,12 +741,14 @@ class Clock extends Component {
             plutoPosText.replaceChildren("");
             const issPosText = this.mount.parentElement.children[15];
             issPosText.replaceChildren("");
+            /*
             const hstPosText = this.mount.parentElement.children[16];
             hstPosText.replaceChildren("");
             const cxoPosText = this.mount.parentElement.children[17];
             cxoPosText.replaceChildren("");
             const vanguard1PosText = this.mount.parentElement.children[18];
             vanguard1PosText.replaceChildren("");
+            */
         }
 
         // FPS button update

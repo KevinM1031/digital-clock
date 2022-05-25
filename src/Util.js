@@ -562,7 +562,7 @@ export async function getHSTPos(lat, lon) {
     // Getting Hubble position data
     // from https://www.n2yo.com/api/
     const url = 'https://api.n2yo.com/rest/v1/satellite/positions/20580/'+lat+'/'+lon+'/0/1&apiKey=BKLA8X-79NYZ6-RKRUYT-4VR8';
-    const res = await fetch(url);
+    const res = await fetch(url, {mode: "no-cors", headers: {'Access-Control-Allow-Origin':'*'}});
     const data = await res.json();
 
     return {
@@ -575,7 +575,7 @@ export async function getCXOPos(lat, lon) {
     // Getting Chandra position data
     // from https://www.n2yo.com/api/
     const url = 'https://api.n2yo.com/rest/v1/satellite/positions/25867/'+lat+'/'+lon+'/0/1&apiKey=BKLA8X-79NYZ6-RKRUYT-4VR8';
-    const res = await fetch(url);
+    const res = await fetch(url, {mode: "no-cors", headers: {'Access-Control-Allow-Origin':'*'}});
     const data = await res.json();
 
     return {
@@ -588,7 +588,7 @@ export async function getVanguard1Pos(lat, lon) {
     // Getting Vanguard 1 position data
     // from https://www.n2yo.com/api/
     const url = 'https://api.n2yo.com/rest/v1/satellite/positions/5/'+lat+'/'+lon+'/0/1&apiKey=BKLA8X-79NYZ6-RKRUYT-4VR8';
-    const res = await fetch(url);
+    const res = await fetch(url, {mode: "no-cors", headers: {'Access-Control-Allow-Origin':'*'}});
     const data = await res.json();
 
     return {
