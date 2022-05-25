@@ -7,7 +7,7 @@ export function getHeight() {
 }
 
 export function isLandscape() {
-    return getHeight() / getWidth() < 1.5;
+    return getHeight() / getWidth() < 1;
 }
 
 export function getDateStr(date) {
@@ -532,7 +532,7 @@ export function getPlanetsPos(date, lat, lon) {
     };
 }
 
-export async function getISSPos(date, lat, lon) {
+export async function getISSPos(lat, lon) {
     lat = lat / 180 * Math.PI;
     lon = lon / 180 * Math.PI;
     const r = 6371;
@@ -555,5 +555,44 @@ export async function getISSPos(date, lat, lon) {
         azimuth: Math.atan2(
             Math.sin(iLon - lon) * Math.cos(iLat), 
             Math.cos(lat) * Math.sin(iLat) - Math.sin(lat) * Math.cos(iLat) * Math.cos(iLon - lon)),
+    };
+}
+
+export async function getHSTPos(lat, lon) {
+    // Getting Hubble position data
+    // from https://www.n2yo.com/api/
+    const url = 'https://api.n2yo.com/rest/v1/satellite/positions/20580/'+lat+'/'+lon+'/0/1&apiKey=BKLA8X-79NYZ6-RKRUYT-4VR8';
+    const res = await fetch(url);
+    const data = await res.json();
+
+    return {
+        altitude: data.positions.elevation / 180 * Math.PI,
+        azimuth: data.positions.azimuth / 180 * Math.PI,
+    };
+}
+
+export async function getCXOPos(lat, lon) {
+    // Getting Chandra position data
+    // from https://www.n2yo.com/api/
+    const url = 'https://api.n2yo.com/rest/v1/satellite/positions/25867/'+lat+'/'+lon+'/0/1&apiKey=BKLA8X-79NYZ6-RKRUYT-4VR8';
+    const res = await fetch(url);
+    const data = await res.json();
+
+    return {
+        altitude: data.positions.elevation / 180 * Math.PI,
+        azimuth: data.positions.azimuth / 180 * Math.PI,
+    };
+}
+
+export async function getVanguard1Pos(lat, lon) {
+    // Getting Vanguard 1 position data
+    // from https://www.n2yo.com/api/
+    const url = 'https://api.n2yo.com/rest/v1/satellite/positions/5/'+lat+'/'+lon+'/0/1&apiKey=BKLA8X-79NYZ6-RKRUYT-4VR8';
+    const res = await fetch(url);
+    const data = await res.json();
+
+    return {
+        altitude: data.positions.elevation / 180 * Math.PI,
+        azimuth: data.positions.azimuth / 180 * Math.PI,
     };
 }

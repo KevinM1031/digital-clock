@@ -5,7 +5,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { 
     getWidth, getHeight, isLandscape, getSunPos, getMoonPos, 
-    getDateStr, getTimeStr, getTimezoneStr, getPlanetsPos, getISSPos
+    getDateStr, getTimeStr, getTimezoneStr, getPlanetsPos,
+    getISSPos, getHSTPos, getCXOPos, getVanguard1Pos
 } from './Util.js';
 
 import landModel from './land.glb';
@@ -33,12 +34,10 @@ class Clock extends Component {
             });
         }
 
-        const date = new Date();
-        this.nextISSTrack = date.getTime() + 100;
-
         if (props.tz) this.tz = -1 * props.tz;
         this.delay = 100;
         this.pov = 3;
+        this.detials = false;
 
         window.addEventListener('resize', () => {this.resize()});
     }
@@ -122,12 +121,11 @@ class Clock extends Component {
     initMoon() {
         const group = new THREE.Group();
         const moon_geo = new THREE.SphereGeometry(0.16, 40, 40);
-        const moon_mat = new THREE.MeshBasicMaterial({ emissive: '#9999cc' });
+        const moon_mat = new THREE.MeshLambertMaterial({ emissive: '#9999cc' });
         const moon = new THREE.Mesh(moon_geo, moon_mat);
 
         const moon_light = new THREE.DirectionalLight( '#444499', 0 );
         moon_light.castShadow = true;
-        moon_light.receiveShadow = true;
         moon_light.shadow.bias = -0.0002;
         moon_light.shadow.mapSize.width = 1400;
         moon_light.shadow.mapSize.height = 1400;
@@ -200,18 +198,57 @@ class Clock extends Component {
     }
 
     initSatellites() {
+        const date = new Date();
+        this.nextISSTrack = date.getTime() + 100;
+        this.nextHSTTrack = date.getTime() + 100;
+        this.nextCXOTrack = date.getTime() + 100;
+        this.nextVanguard1Track = date.getTime() + 100;
+        this.issPos = {altitude: 0, azimuth: 0};
+        this.hstPos = {altitude: 0, azimuth: 0};
+        this.cxoPos = {altitude: 0, azimuth: 0};
+        this.vanguard1Pos = {altitude: 0, azimuth: 0};
+
         const group = new THREE.Group();
 
-        const iss_geo = new THREE.SphereGeometry(0.016, 10, 10);
+        const iss_geo = new THREE.SphereGeometry(0.018, 10, 10);
         const iss_mat = new THREE.MeshLambertMaterial({ color: '#212636', emissive: '#ff0000' });
         const iss = new THREE.Mesh(iss_geo, iss_mat);
         group.add(iss);
         this.iss = iss;
-
-        const iss_cover_geo = new THREE.SphereGeometry(0.018, 10, 5, Math.PI, Math.PI);
+        const iss_cover_geo = new THREE.SphereGeometry(0.02, 10, 5, Math.PI, Math.PI);
         const iss_cover_mat = new THREE.MeshBasicMaterial({ color: '#000000' });
         const iss_cover = new THREE.Mesh(iss_cover_geo, iss_cover_mat);
         iss.add(iss_cover);
+
+        const hst_geo = new THREE.SphereGeometry(0.012, 10, 10);
+        const hst_mat = new THREE.MeshLambertMaterial({ color: '#212636', emhstive: '#ff0000' });
+        const hst = new THREE.Mesh(hst_geo, hst_mat);
+        group.add(hst);
+        this.hst = hst;
+        const hst_cover_geo = new THREE.SphereGeometry(0.014, 10, 5, Math.PI, Math.PI);
+        const hst_cover_mat = new THREE.MeshBasicMaterial({ color: '#000000' });
+        const hst_cover = new THREE.Mesh(hst_cover_geo, hst_cover_mat);
+        hst.add(hst_cover);
+
+        const cxo_geo = new THREE.SphereGeometry(0.01, 10, 10);
+        const cxo_mat = new THREE.MeshLambertMaterial({ color: '#212636', emcxoive: '#ff0000' });
+        const cxo = new THREE.Mesh(cxo_geo, cxo_mat);
+        group.add(cxo);
+        this.cxo = cxo;
+        const cxo_cover_geo = new THREE.SphereGeometry(0.012, 10, 5, Math.PI, Math.PI);
+        const cxo_cover_mat = new THREE.MeshBasicMaterial({ color: '#000000' });
+        const cxo_cover = new THREE.Mesh(cxo_cover_geo, cxo_cover_mat);
+        cxo.add(cxo_cover);
+
+        const vanguard1_geo = new THREE.SphereGeometry(0.008, 10, 10);
+        const vanguard1_mat = new THREE.MeshLambertMaterial({ color: '#212636', emvanguard1ive: '#ff0000' });
+        const vanguard1 = new THREE.Mesh(vanguard1_geo, vanguard1_mat);
+        group.add(vanguard1);
+        this.vanguard1 = vanguard1;
+        const vanguard1_cover_geo = new THREE.SphereGeometry(0.01, 10, 5, Math.PI, Math.PI);
+        const vanguard1_cover_mat = new THREE.MeshBasicMaterial({ color: '#000000' });
+        const vanguard1_cover = new THREE.Mesh(vanguard1_cover_geo, vanguard1_cover_mat);
+        vanguard1.add(vanguard1_cover);
 
         group.castShadow = false;
         group.receiveShadow = false;
@@ -298,7 +335,7 @@ class Clock extends Component {
         let godraysEffect_pluto = new POSTPROCESSING.GodRaysEffect(this.camera, this.pluto, {
             resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
         let godraysEffect_iss = new POSTPROCESSING.GodRaysEffect(this.camera, this.iss, {
-            resolutionScale: 0.5, density: 0.5, decay: 0.9, weight: 0.9, samples: 10 });
+            resolutionScale: 0.5, density: 0.5, decay: 0.7, weight: 0.9, samples: 10 });
         let smaaEffect = new POSTPROCESSING.SMAAEffect({});
         let renderPass = new POSTPROCESSING.RenderPass(this.scene, this.camera);
         let effectPass = new POSTPROCESSING.EffectPass(this.camera, 
@@ -328,6 +365,7 @@ class Clock extends Component {
     }
 
     animate() {
+        this.controls.update();
 
         // Get date
         let date = new Date();
@@ -381,7 +419,7 @@ class Clock extends Component {
 
         const moonMesh = this.moon.children[0];
         const moonLight = moonMesh.children[0];
-        moonLight.intensity = Math.max(Math.sin(-sunPos.altitude), 0) * Math.max(Math.sin(moonPos.altitude)) * moonIllum;
+        moonLight.intensity = Math.max(Math.sin(-sunPos.altitude), 0) * Math.max(Math.sin(moonPos.altitude), 0) * moonIllum;
 
         // Moon phase calculation
         const moonCover = moonMesh.children[1];
@@ -423,21 +461,73 @@ class Clock extends Component {
             Math.sin(planetsPos.pluto.altitude) * planetsDist,
             -Math.cos(planetsPos.pluto.azimuth) * Math.cos(planetsPos.pluto.altitude) * planetsDist);
 
-        // Satellite position calculation
+        // ISS position calculation
         const satellitesDist = 5.4
-        const satelliteUpdateFreq = 2000;
+        const issUpdateFreq = 2000;
         if (this.nextISSTrack <= date.getTime()) {
-            this.nextISSTrack = date.getTime() + satelliteUpdateFreq;
-            getISSPos(date, this.lat, this.lon).then((issPos) => {
-                this.iss.material.emissive.set('#ff0000');
+            this.nextISSTrack = date.getTime() + issUpdateFreq;
+            getISSPos(this.lat, this.lon).then((pos) => {
+                this.issPos = pos;
+                this.iss.material.emissive.set('#00ff00');
                 this.iss.position.set(
-                    Math.sin(issPos.azimuth) * Math.cos(issPos.altitude) * satellitesDist,
-                    Math.sin(issPos.altitude) * satellitesDist,
-                    -Math.cos(issPos.azimuth) * Math.cos(issPos.altitude) * satellitesDist);
+                    Math.sin(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist,
+                    Math.sin(pos.altitude) * satellitesDist,
+                    -Math.cos(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist);
                 this.iss.children[0].lookAt((sx*1000), (sy*1000), (sz*1000));
             });
-        } else if(this.nextISSTrack - satelliteUpdateFreq/2 <= date.getTime()) {
+        } else if(this.nextISSTrack - issUpdateFreq/2 <= date.getTime()) {
             this.iss.material.emissive.set('#ffffff');
+        }
+
+        // HST position calculation
+        const hstUpdateFreq = 10000;
+        if (this.nextHSTTrack <= date.getTime()) {
+            this.nextHSTTrack = date.getTime() + hstUpdateFreq;
+            getHSTPos(this.lat, this.lon).then((pos) => {
+                this.hstPos = pos;
+                this.hst.material.emissive.set('#ffff00');
+                this.hst.position.set(
+                    Math.sin(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist,
+                    Math.sin(pos.altitude) * satellitesDist,
+                    -Math.cos(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist);
+                this.hst.children[0].lookAt((sx*1000), (sy*1000), (sz*1000));
+            });
+        } else if(this.nextHSTTrack - hstUpdateFreq/2 <= date.getTime()) {
+            this.hst.material.emissive.set('#ffffff');
+        }
+
+        // CXO position calculation
+        const cxoUpdateFreq = 12000;
+        if (this.nextCXOTrack <= date.getTime()) {
+            this.nextCXOTrack = date.getTime() + cxoUpdateFreq;
+            getCXOPos(this.lat, this.lon).then((pos) => {
+                this.cxoPos = pos;
+                this.cxo.material.emissive.set('#ffff00');
+                this.cxo.position.set(
+                    Math.sin(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist,
+                    Math.sin(pos.altitude) * satellitesDist,
+                    -Math.cos(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist);
+                this.cxo.children[0].lookAt((sx*1000), (sy*1000), (sz*1000));
+            });
+        } else if(this.nextCXOTrack - cxoUpdateFreq/2 <= date.getTime()) {
+            this.vanguard1.material.emissive.set('#ffffff');
+        }
+
+        // Vanguard 1 position calculation
+        const vanguard1UpdateFreq = 14000;
+        if (this.nextVanguard1Track <= date.getTime()) {
+            this.nextVanguard1Track = date.getTime() + vanguard1UpdateFreq;
+            getVanguard1Pos(this.lat, this.lon).then((pos) => {
+                this.vanguard1Pos = pos;
+                this.vanguard1.material.emissive.set('#ff0000');
+                this.vanguard1.position.set(
+                    Math.sin(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist,
+                    Math.sin(pos.altitude) * satellitesDist,
+                    -Math.cos(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist);
+                this.vanguard1.children[0].lookAt((sx*1000), (sy*1000), (sz*1000));
+            });
+        } else if(this.nextVanguard1Track - vanguard1UpdateFreq/2 <= date.getTime()) {
+            this.vanguard1.material.emissive.set('#ffffff');
         }
 
         // Lamp light calculation (based on civil twilight)
@@ -458,7 +548,7 @@ class Clock extends Component {
         timeText.style.left = width/2 - timeText.clientWidth/2 + 'px';
         timeText.style.top = height * 0.08 + 'px';
         timeText.style.color = textColor;
-        timeText.style.fontSize = landscape ? '70px' : '47px';
+        timeText.style.fontSize = landscape ? '70px' : '35px';
         timeText.replaceChildren(getTimeStr(date));
 
         // Date text update
@@ -466,7 +556,7 @@ class Clock extends Component {
         dateText.style.left = width/2 - dateText.clientWidth/2 + 'px';
         dateText.style.top = height * 0.2 + 'px';
         dateText.style.color = textColor;
-        dateText.style.fontSize = landscape ? '40px' : '27px';
+        dateText.style.fontSize = landscape ? '40px' : '20px';
         dateText.replaceChildren(getDateStr(date));
 
         // Timezone text update
@@ -474,7 +564,7 @@ class Clock extends Component {
         timezoneText.style.left = width/2 - timezoneText.clientWidth/2 + 'px';
         timezoneText.style.top = height * 0.78 + 'px';
         timezoneText.style.color = textColor;
-        timezoneText.style.fontSize = landscape ? '40px' : '27px';
+        timezoneText.style.fontSize = landscape ? '40px' : '20px';
         timezoneText.replaceChildren(getTimezoneStr(this.tz ? this.tz : date.getTimezoneOffset()));
 
         // Coordinate text update
@@ -482,7 +572,7 @@ class Clock extends Component {
         coordText.style.left = width/2 - coordText.clientWidth/2 + 'px';
         coordText.style.top = height * 0.85 + 'px';
         coordText.style.color = textColor;
-        coordText.style.fontSize = landscape ? '15px' : '10px';
+        coordText.style.fontSize = landscape ? '15px' : '8px';
         coordText.replaceChildren("GCS [" + this.lat + ", " + this.lon + "]");
 
         // Sun position text update
@@ -490,7 +580,7 @@ class Clock extends Component {
         sunPosText.style.left = width/2 - sunPosText.clientWidth/2 + 'px';
         sunPosText.style.top = height * 0.88 + 'px';
         sunPosText.style.color = textColor;
-        sunPosText.style.fontSize = landscape ? '15px' : '10px';
+        sunPosText.style.fontSize = landscape ? '15px' : '8px';
         sunPosText.replaceChildren("☉ Alt/Az [" 
             + Math.round(sunPos.altitude / Math.PI * 18000) / 100 + ", " 
             + Math.round(sunPos.azimuth / Math.PI * 18000) / 100 + "]");
@@ -500,28 +590,194 @@ class Clock extends Component {
         moonPosText.style.left = width/2 - moonPosText.clientWidth/2 + 'px';
         moonPosText.style.top = height * 0.905 + 'px';
         moonPosText.style.color = textColor;
-        moonPosText.style.fontSize = landscape ? '15px' : '10px';
+        moonPosText.style.fontSize = landscape ? '15px' : '8px';
         moonPosText.replaceChildren("☾ Alt/Az [" 
             + Math.round(moonPos.altitude / Math.PI * 18000) / 100 + ", " 
             + Math.round(moonPos.azimuth / Math.PI * 18000) / 100 + "]");
 
+        // Minor objects position text update
+        if (this.details) {
+            const mercuryPosText = this.mount.parentElement.children[7];
+            mercuryPosText.style.left = (landscape ? 30 : width/2 - mercuryPosText.clientWidth/2) + 'px';
+            mercuryPosText.style.top = height * (0.34 - (landscape ? 0.3 : 0)) + 'px';
+            mercuryPosText.style.textAlign = 'left';
+            mercuryPosText.style.color = textColor;
+            mercuryPosText.style.fontSize = landscape ? '12px' : '6px';
+            mercuryPosText.replaceChildren("☿ Alt/Az [" 
+                + Math.round(planetsPos.mercury.altitude / Math.PI * 18000) / 100 + ", " 
+                + Math.round(planetsPos.mercury.azimuth / Math.PI * 18000) / 100 + "]");
+
+            const venusPosText = this.mount.parentElement.children[8];
+            venusPosText.style.left = (landscape ? 30 : width/2 - venusPosText.clientWidth/2) + 'px';
+            venusPosText.style.top = height * (0.36 - (landscape ? 0.3 : 0)) + 'px';
+            venusPosText.style.textAlign = 'left';
+            venusPosText.style.color = textColor;
+            venusPosText.style.fontSize = landscape ? '12px' : '6px';
+            venusPosText.replaceChildren("♀ Alt/Az [" 
+                + Math.round(planetsPos.venus.altitude / Math.PI * 18000) / 100 + ", " 
+                + Math.round(planetsPos.venus.azimuth / Math.PI * 18000) / 100 + "]");
+
+            const marsPosText = this.mount.parentElement.children[9];
+            marsPosText.style.left = (landscape ? 30 : width/2 - marsPosText.clientWidth/2) + 'px';
+            marsPosText.style.top = height * (0.38 - (landscape ? 0.3 : 0)) + 'px';
+            marsPosText.style.textAlign = 'left';
+            marsPosText.style.color = textColor;
+            marsPosText.style.fontSize = landscape ? '12px' : '6px';
+            marsPosText.replaceChildren("♂ Alt/Az [" 
+                + Math.round(planetsPos.mars.altitude / Math.PI * 18000) / 100 + ", " 
+                + Math.round(planetsPos.mars.azimuth / Math.PI * 18000) / 100 + "]");
+
+            const jupiterPosText = this.mount.parentElement.children[10];
+            jupiterPosText.style.left = (landscape ? 30 : width/2 - jupiterPosText.clientWidth/2) + 'px';
+            jupiterPosText.style.top = height * (0.4 - (landscape ? 0.3 : 0)) + 'px';
+            jupiterPosText.style.textAlign = 'left';
+            jupiterPosText.style.color = textColor;
+            jupiterPosText.style.fontSize = landscape ? '12px' : '6px';
+            jupiterPosText.replaceChildren("♃ Alt/Az [" 
+                + Math.round(planetsPos.jupiter.altitude / Math.PI * 18000) / 100 + ", " 
+                + Math.round(planetsPos.jupiter.azimuth / Math.PI * 18000) / 100 + "]");
+
+            const saturnPosText = this.mount.parentElement.children[11];
+            saturnPosText.style.left = (landscape ? 30 : width/2 - saturnPosText.clientWidth/2) + 'px';
+            saturnPosText.style.top = height * (0.42 - (landscape ? 0.3 : 0)) + 'px';
+            saturnPosText.style.textAlign = 'left';
+            saturnPosText.style.color = textColor;
+            saturnPosText.style.fontSize = landscape ? '12px' : '6px';
+            saturnPosText.replaceChildren("♄ Alt/Az [" 
+                + Math.round(planetsPos.saturn.altitude / Math.PI * 18000) / 100 + ", " 
+                + Math.round(planetsPos.saturn.azimuth / Math.PI * 18000) / 100 + "]");
+
+            const uranusPosText = this.mount.parentElement.children[12];
+            uranusPosText.style.left = (landscape ? 30 : width/2 - uranusPosText.clientWidth/2) + 'px';
+            uranusPosText.style.top = height * (0.44 - (landscape ? 0.3 : 0)) + 'px';
+            uranusPosText.style.textAlign = 'left';
+            uranusPosText.style.color = textColor;
+            uranusPosText.style.fontSize = landscape ? '12px' : '6px';
+            uranusPosText.replaceChildren("⛢ Alt/Az [" 
+                + Math.round(planetsPos.uranus.altitude / Math.PI * 18000) / 100 + ", " 
+                + Math.round(planetsPos.uranus.azimuth / Math.PI * 18000) / 100 + "]");
+
+            const neptunePosText = this.mount.parentElement.children[13];
+            neptunePosText.style.left = (landscape ? 30 : width/2 - neptunePosText.clientWidth/2) + 'px';
+            neptunePosText.style.top = height * (0.46 - (landscape ? 0.3 : 0)) + 'px';
+            neptunePosText.style.textAlign = 'left';
+            neptunePosText.style.color = textColor;
+            neptunePosText.style.fontSize = landscape ? '12px' : '6px';
+            neptunePosText.replaceChildren("♆ Alt/Az [" 
+                + Math.round(planetsPos.neptune.altitude / Math.PI * 18000) / 100 + ", " 
+                + Math.round(planetsPos.neptune.azimuth / Math.PI * 18000) / 100 + "]");
+
+            const plutoPosText = this.mount.parentElement.children[14];
+            plutoPosText.style.left = (landscape ? 30 : width/2 - plutoPosText.clientWidth/2) + 'px';
+            plutoPosText.style.top = height * (0.48 - (landscape ? 0.3 : 0)) + 'px';
+            plutoPosText.style.textAlign = 'left';
+            plutoPosText.style.color = textColor;
+            plutoPosText.style.fontSize = landscape ? '12px' : '6px';
+            plutoPosText.replaceChildren("♇ Alt/Az [" 
+                + Math.round(planetsPos.pluto.altitude / Math.PI * 18000) / 100 + ", " 
+                + Math.round(planetsPos.pluto.azimuth / Math.PI * 18000) / 100 + "]");
+
+            const issPosText = this.mount.parentElement.children[15];
+            issPosText.style.right = (landscape ? 30 : width/2 - issPosText.clientWidth/2) + 'px';
+            issPosText.style.top = height * (0.34 - (landscape ? 0.3 : 0)) + 'px';
+            issPosText.style.textAlign = 'left';
+            issPosText.style.color = textColor;
+            issPosText.style.fontSize = landscape ? '12px' : '6px';
+            issPosText.replaceChildren("ISS Alt/Az [" 
+                + Math.round(this.issPos.altitude / Math.PI * 18000) / 100 + ", " 
+                + Math.round(this.issPos.azimuth / Math.PI * 18000) / 100 + "]");
+
+            const hstPosText = this.mount.parentElement.children[16];
+            hstPosText.style.right = (landscape ? 30 : width/2 - hstPosText.clientWidth/2) + 'px';
+            hstPosText.style.top = height * (0.36 - (landscape ? 0.3 : 0)) + 'px';
+            hstPosText.style.textAlign = 'left';
+            hstPosText.style.color = textColor;
+            hstPosText.style.fontSize = landscape ? '12px' : '6px';
+            hstPosText.replaceChildren("HST Alt/Az [" 
+                + Math.round(this.hstPos.altitude / Math.PI * 18000) / 100 + ", " 
+                + Math.round(this.hstPos.azimuth / Math.PI * 18000) / 100 + "]");
+
+            const cxoPosText = this.mount.parentElement.children[17];
+            cxoPosText.style.right = (landscape ? 30 : width/2 - cxoPosText.clientWidth/2) + 'px';
+            cxoPosText.style.top = height * (0.38 - (landscape ? 0.3 : 0)) + 'px';
+            cxoPosText.style.textAlign = 'left';
+            cxoPosText.style.color = textColor;
+            cxoPosText.style.fontSize = landscape ? '12px' : '6px';
+            cxoPosText.replaceChildren("CXO Alt/Az [" 
+                + Math.round(this.cxoPos.altitude / Math.PI * 18000) / 100 + ", " 
+                + Math.round(this.cxoPos.azimuth / Math.PI * 18000) / 100 + "]");
+
+            const vanguard1PosText = this.mount.parentElement.children[18];
+            vanguard1PosText.style.right = (landscape ? 30 : width/2 - vanguard1PosText.clientWidth/2) + 'px';
+            vanguard1PosText.style.top = height * (0.4 - (landscape ? 0.3 : 0)) + 'px';
+            vanguard1PosText.style.textAlign = 'left';
+            vanguard1PosText.style.color = textColor;
+            vanguard1PosText.style.fontSize = landscape ? '12px' : '6px';
+            vanguard1PosText.replaceChildren("Vanguard 1 Alt/Az [" 
+                + Math.round(this.vanguard1Pos.altitude / Math.PI * 18000) / 100 + ", " 
+                + Math.round(this.vanguard1Pos.azimuth / Math.PI * 18000) / 100 + "]");
+        } else {
+            const mercuryPosText = this.mount.parentElement.children[7];
+            mercuryPosText.replaceChildren("");
+            const venusPosText = this.mount.parentElement.children[8];
+            venusPosText.replaceChildren("");
+            const marsPosText = this.mount.parentElement.children[9];
+            marsPosText.replaceChildren("");
+            const jupiterPosText = this.mount.parentElement.children[10];
+            jupiterPosText.replaceChildren("");
+            const saturnPosText = this.mount.parentElement.children[11];
+            saturnPosText.replaceChildren("");
+            const uranusPosText = this.mount.parentElement.children[12];
+            uranusPosText.replaceChildren("");
+            const neptunePosText = this.mount.parentElement.children[13];
+            neptunePosText.replaceChildren("");
+            const plutoPosText = this.mount.parentElement.children[14];
+            plutoPosText.replaceChildren("");
+            const issPosText = this.mount.parentElement.children[15];
+            issPosText.replaceChildren("");
+            const hstPosText = this.mount.parentElement.children[16];
+            hstPosText.replaceChildren("");
+            const cxoPosText = this.mount.parentElement.children[17];
+            cxoPosText.replaceChildren("");
+            const vanguard1PosText = this.mount.parentElement.children[18];
+            vanguard1PosText.replaceChildren("");
+        }
+
         // FPS button update
-        const fpsBtn = this.mount.parentElement.children[7];
+        const fpsBtn = this.mount.parentElement.children[19];
         fpsBtn.style.left = width/2 - fpsBtn.clientWidth/2 - timezoneText.clientWidth*0.8 + 'px';
-        fpsBtn.style.top = height * 0.78 - fpsBtn.clientHeight/2 + timezoneText.clientHeight/2 + 'px';
+        fpsBtn.style.top = height * 0.8 - fpsBtn.clientHeight/2 + timezoneText.clientHeight/2 + 'px';
         fpsBtn.style.color = textColor;
         fpsBtn.style.border = '2px solid ' + textColor;
-        fpsBtn.style.fontSize = landscape ? '21px' : '14px';
+        fpsBtn.style.fontSize = landscape ? '15px' : '10px';
         fpsBtn.replaceChildren(this.delay === 100 ? '10 FPS' : '40 FPS');
 
         // POV button update
-        const povBtn = this.mount.parentElement.children[8];
+        const povBtn = this.mount.parentElement.children[20];
         povBtn.style.left = width/2 - povBtn.clientWidth/2 + timezoneText.clientWidth*0.8 + 'px';
-        povBtn.style.top = height * 0.78 - povBtn.clientHeight/2 + timezoneText.clientHeight/2 + 'px';
+        povBtn.style.top = height * 0.8 - povBtn.clientHeight/2 + timezoneText.clientHeight/2 + 'px';
         povBtn.style.color = textColor;
         povBtn.style.border = '2px solid ' + textColor;
-        povBtn.style.fontSize = landscape ? '21px' : '14px';
+        povBtn.style.fontSize = landscape ? '15px' : '10px';
         povBtn.replaceChildren(this.pov === 1 ? '1st POV' : '3rd POV');
+
+        // Rotate button update
+        const rotBtn = this.mount.parentElement.children[21];
+        rotBtn.style.left = width/2 - rotBtn.clientWidth/2 - timezoneText.clientWidth*0.8 + 'px';
+        rotBtn.style.top = height * 0.86 - rotBtn.clientHeight/2 + timezoneText.clientHeight/2 + 'px';
+        rotBtn.style.color = textColor;
+        rotBtn.style.border = '2px solid ' + textColor;
+        rotBtn.style.fontSize = landscape ? '15px' : '10px';
+        rotBtn.replaceChildren(this.controls.autoRotate ? 'Rotating' : 'Fixed');
+
+        // Details button update
+        const detBtn = this.mount.parentElement.children[22];
+        detBtn.style.left = width/2 - detBtn.clientWidth/2 + timezoneText.clientWidth*0.8 + 'px';
+        detBtn.style.top = height * 0.86 - detBtn.clientHeight/2 + timezoneText.clientHeight/2 + 'px';
+        detBtn.style.color = textColor;
+        detBtn.style.border = '2px solid ' + textColor;
+        detBtn.style.fontSize = landscape ? '15px' : '10px';
+        detBtn.replaceChildren(this.details ? 'Detailed' : 'Simple');
 
         // Coordinate update
         if (!this.posFixed) {
@@ -578,41 +834,42 @@ class Clock extends Component {
                 <div style={{position: 'relative'}}
                     ref={(mount) => { this.mount = mount }}/>
 
-                <div style={{
-                    fontSize: '550%',
-                }}/>
-                
-                <div style={{
-                    fontSize: '300%',
-                }}/>
+                <div/>
+                <div/>
+                <div/>
+                <div/>
+                <div/>
+                <div/>
 
-                <div style={{
-                    fontSize: '270%',
-                }}/>
+                <div/>
+                <div/>
+                <div/>
+                <div/>
+                <div/>
+                <div/>
+                <div/>
+                <div/>
 
-                <div style={{
-                    fontSize: '120%',
-                }}/>
-
-                <div style={{
-                    fontSize: '120%',
-                }}/>
-
-                <div style={{
-                    fontSize: '120%',
-                }}/>
+                <div/>
+                <div/>
+                <div/>
+                <div/>
 
                 <button onClick={() => {
                     this.delay = this.delay === 100 ? 25 : 100;
-                }} style={{
-                    fontSize: '200%',
                 }}/>
 
                 <button onClick={() => {
                     this.pov = this.pov === 1 ? 3 : 1;
                     this.updatePerspective();
-                }}style={{
-                    fontSize: '200%',
+                }}/>
+
+                <button onClick={() => {
+                    this.controls.autoRotate = !this.controls.autoRotate;
+                }}/>
+
+                <button onClick={() => {
+                    this.details = !this.details;
                 }}/>
             </div>
         )
