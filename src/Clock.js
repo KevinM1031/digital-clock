@@ -202,11 +202,16 @@ class Clock extends Component {
     initSatellites() {
         const group = new THREE.Group();
 
-        const iss_geo = new THREE.SphereGeometry(0.01, 10, 10);
+        const iss_geo = new THREE.SphereGeometry(0.016, 10, 10);
         const iss_mat = new THREE.MeshLambertMaterial({ color: '#212636', emissive: '#ff0000' });
         const iss = new THREE.Mesh(iss_geo, iss_mat);
         group.add(iss);
         this.iss = iss;
+
+        const iss_cover_geo = new THREE.SphereGeometry(0.018, 10, 5, Math.PI, Math.PI);
+        const iss_cover_mat = new THREE.MeshBasicMaterial({ color: '#000000' });
+        const iss_cover = new THREE.Mesh(iss_cover_geo, iss_cover_mat);
+        iss.add(iss_cover);
 
         group.castShadow = false;
         group.receiveShadow = false;
@@ -429,9 +434,10 @@ class Clock extends Component {
                     Math.sin(issPos.azimuth) * Math.cos(issPos.altitude) * satellitesDist,
                     Math.sin(issPos.altitude) * satellitesDist,
                     -Math.cos(issPos.azimuth) * Math.cos(issPos.altitude) * satellitesDist);
+                this.iss.children[0].lookAt((sx*1000), (sy*1000), (sz*1000));
             });
         } else if(this.nextISSTrack - satelliteUpdateFreq/2 <= date.getTime()) {
-            this.iss.material.emissive.set('#000000');
+            this.iss.material.emissive.set('#ffffff');
         }
 
         // Lamp light calculation (based on civil twilight)
