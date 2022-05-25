@@ -604,7 +604,7 @@ class Clock extends Component {
             const mercuryPosText = this.mount.parentElement.children[7];
             mercuryPosText.style.left = (landscape ? 30 : width/2 - mercuryPosText.clientWidth/2) + 'px';
             mercuryPosText.style.top = height * (0.34 - (landscape ? 0.3 : 0)) + 'px';
-            mercuryPosText.style.textAlign = 'left';
+            mercuryPosText.style.textAlign = landscape ? 'left' : 'center';
             mercuryPosText.style.color = textColor;
             mercuryPosText.style.fontSize = landscape ? '12px' : '6px';
             mercuryPosText.replaceChildren("☿ Alt/Az [" 
@@ -614,7 +614,7 @@ class Clock extends Component {
             const venusPosText = this.mount.parentElement.children[8];
             venusPosText.style.left = (landscape ? 30 : width/2 - venusPosText.clientWidth/2) + 'px';
             venusPosText.style.top = height * (0.36 - (landscape ? 0.3 : 0)) + 'px';
-            venusPosText.style.textAlign = 'left';
+            venusPosText.style.textAlign = landscape ? 'left' : 'center';
             venusPosText.style.color = textColor;
             venusPosText.style.fontSize = landscape ? '12px' : '6px';
             venusPosText.replaceChildren("♀ Alt/Az [" 
@@ -624,7 +624,7 @@ class Clock extends Component {
             const marsPosText = this.mount.parentElement.children[9];
             marsPosText.style.left = (landscape ? 30 : width/2 - marsPosText.clientWidth/2) + 'px';
             marsPosText.style.top = height * (0.38 - (landscape ? 0.3 : 0)) + 'px';
-            marsPosText.style.textAlign = 'left';
+            marsPosText.style.textAlign = landscape ? 'left' : 'center';
             marsPosText.style.color = textColor;
             marsPosText.style.fontSize = landscape ? '12px' : '6px';
             marsPosText.replaceChildren("♂ Alt/Az [" 
@@ -634,7 +634,7 @@ class Clock extends Component {
             const jupiterPosText = this.mount.parentElement.children[10];
             jupiterPosText.style.left = (landscape ? 30 : width/2 - jupiterPosText.clientWidth/2) + 'px';
             jupiterPosText.style.top = height * (0.4 - (landscape ? 0.3 : 0)) + 'px';
-            jupiterPosText.style.textAlign = 'left';
+            jupiterPosText.style.textAlign = landscape ? 'left' : 'center';
             jupiterPosText.style.color = textColor;
             jupiterPosText.style.fontSize = landscape ? '12px' : '6px';
             jupiterPosText.replaceChildren("♃ Alt/Az [" 
@@ -644,7 +644,7 @@ class Clock extends Component {
             const saturnPosText = this.mount.parentElement.children[11];
             saturnPosText.style.left = (landscape ? 30 : width/2 - saturnPosText.clientWidth/2) + 'px';
             saturnPosText.style.top = height * (0.42 - (landscape ? 0.3 : 0)) + 'px';
-            saturnPosText.style.textAlign = 'left';
+            saturnPosText.style.textAlign = landscape ? 'left' : 'center';
             saturnPosText.style.color = textColor;
             saturnPosText.style.fontSize = landscape ? '12px' : '6px';
             saturnPosText.replaceChildren("♄ Alt/Az [" 
@@ -654,7 +654,7 @@ class Clock extends Component {
             const uranusPosText = this.mount.parentElement.children[12];
             uranusPosText.style.left = (landscape ? 30 : width/2 - uranusPosText.clientWidth/2) + 'px';
             uranusPosText.style.top = height * (0.44 - (landscape ? 0.3 : 0)) + 'px';
-            uranusPosText.style.textAlign = 'left';
+            uranusPosText.style.textAlign = landscape ? 'left' : 'center';
             uranusPosText.style.color = textColor;
             uranusPosText.style.fontSize = landscape ? '12px' : '6px';
             uranusPosText.replaceChildren("⛢ Alt/Az [" 
@@ -664,7 +664,7 @@ class Clock extends Component {
             const neptunePosText = this.mount.parentElement.children[13];
             neptunePosText.style.left = (landscape ? 30 : width/2 - neptunePosText.clientWidth/2) + 'px';
             neptunePosText.style.top = height * (0.46 - (landscape ? 0.3 : 0)) + 'px';
-            neptunePosText.style.textAlign = 'left';
+            neptunePosText.style.textAlign = landscape ? 'left' : 'center';
             neptunePosText.style.color = textColor;
             neptunePosText.style.fontSize = landscape ? '12px' : '6px';
             neptunePosText.replaceChildren("♆ Alt/Az [" 
@@ -674,7 +674,7 @@ class Clock extends Component {
             const plutoPosText = this.mount.parentElement.children[14];
             plutoPosText.style.left = (landscape ? 30 : width/2 - plutoPosText.clientWidth/2) + 'px';
             plutoPosText.style.top = height * (0.48 - (landscape ? 0.3 : 0)) + 'px';
-            plutoPosText.style.textAlign = 'left';
+            plutoPosText.style.textAlign = landscape ? 'left' : 'center';
             plutoPosText.style.color = textColor;
             plutoPosText.style.fontSize = landscape ? '12px' : '6px';
             plutoPosText.replaceChildren("♇ Alt/Az [" 
@@ -683,8 +683,8 @@ class Clock extends Component {
 
             const issPosText = this.mount.parentElement.children[15];
             issPosText.style.right = (landscape ? 30 : width/2 - issPosText.clientWidth/2) + 'px';
-            issPosText.style.top = height * (0.34 - (landscape ? 0.3 : 0)) + 'px';
-            issPosText.style.textAlign = 'left';
+            issPosText.style.top = height * (0.34 - (landscape ? 0.3 : -0.17)) + 'px';
+            issPosText.style.textAlign = landscape ? 'right' : 'center';
             issPosText.style.color = textColor;
             issPosText.style.fontSize = landscape ? '12px' : '6px';
             issPosText.replaceChildren("ISS Alt/Az [" 
@@ -694,8 +694,8 @@ class Clock extends Component {
             /*
             const hstPosText = this.mount.parentElement.children[16];
             hstPosText.style.right = (landscape ? 30 : width/2 - hstPosText.clientWidth/2) + 'px';
-            hstPosText.style.top = height * (0.36 - (landscape ? 0.3 : 0)) + 'px';
-            hstPosText.style.textAlign = 'left';
+            hstPosText.style.top = height * (0.36 - (landscape ? 0.3 : -0.17)) + 'px';
+            hstPosText.style.textAlign = landscape ? 'right' : 'center';
             hstPosText.style.color = textColor;
             hstPosText.style.fontSize = landscape ? '12px' : '6px';
             hstPosText.replaceChildren("HST Alt/Az [" 
@@ -704,8 +704,8 @@ class Clock extends Component {
 
             const cxoPosText = this.mount.parentElement.children[17];
             cxoPosText.style.right = (landscape ? 30 : width/2 - cxoPosText.clientWidth/2) + 'px';
-            cxoPosText.style.top = height * (0.38 - (landscape ? 0.3 : 0)) + 'px';
-            cxoPosText.style.textAlign = 'left';
+            cxoPosText.style.top = height * (0.38 - (landscape ? 0.3 : -0.17)) + 'px';
+            cxoPosText.style.textAlign = landscape ? 'right' : 'center';
             cxoPosText.style.color = textColor;
             cxoPosText.style.fontSize = landscape ? '12px' : '6px';
             cxoPosText.replaceChildren("CXO Alt/Az [" 
@@ -715,7 +715,7 @@ class Clock extends Component {
             const vanguard1PosText = this.mount.parentElement.children[18];
             vanguard1PosText.style.right = (landscape ? 30 : width/2 - vanguard1PosText.clientWidth/2) + 'px';
             vanguard1PosText.style.top = height * (0.4 - (landscape ? 0.3 : 0)) + 'px';
-            vanguard1PosText.style.textAlign = 'left';
+            vanguard1PosText.style.textAlign = landscape ? 'right' : 'center';
             vanguard1PosText.style.color = textColor;
             vanguard1PosText.style.fontSize = landscape ? '12px' : '6px';
             vanguard1PosText.replaceChildren("Vanguard 1 Alt/Az [" 
