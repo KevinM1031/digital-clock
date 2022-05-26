@@ -22,8 +22,8 @@ class Clock extends Component {
         this.myRef = createRef();
 
         this.posFixed = props.lat && props.lon;
-        this.lat = 0;
-        this.lon = 0;
+        this.lat = 33.7695; // Atlanta position as default
+        this.lon = -84.3857;
         if (this.posFixed) {
             this.lat = Math.max(-89.999999, Math.min(89.999999, 1 * props.lat));
             this.lon = 1 * props.lon;
