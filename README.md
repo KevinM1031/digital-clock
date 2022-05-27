@@ -4,7 +4,7 @@ A cool little online digital clock.
 Visit the [website](https://kevinm1031.github.io/digital-clock/).
 
 Includes a floating island (my first ever 3D model) orbited by a sun, moon, 7 other planets, Pluto, and the ISS.  
-Positions of these celestial bodies are calculated based on the local position of the user (neat).
+Positions of these celestial bodies are calculated based on the local position of the user (neat).  
 Clock runs at 10 FPS by default to reduce computing resource usage (with an option to increase this to 40).
 
 UI texts are green during day, blue during night, and orange during sunrise/sunset (sun altitude between -18 and -18 degrees, i.e. based on astronomical twilight).  
