@@ -1,4 +1,4 @@
-# digital-clock
+# Digital Clock
 
 A cool little online digital clock.  
 Visit the [website](https://kevinm1031.github.io/digital-clock/).
