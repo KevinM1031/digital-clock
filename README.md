@@ -5,6 +5,7 @@ Visit the [website](https://kevinm1031.github.io/digital-clock/).
 
 Includes a floating island (my first ever 3D model) orbited by a sun, moon, 7 other planets, Pluto, and the ISS.  
 Positions of these celestial bodies are calculated based on the local position of the user (neat).
+Clock runs at 10 FPS by default to reduce computing resource usage (with an option to increase this to 40).
 
 UI texts are green during day, blue during night, and orange during sunrise/sunset (sun altitude between -18 and -18 degrees, i.e. based on astronomical twilight).  
 House light turns on when sun altitude is below -6 degrees (i.e. based on civil twilight).
