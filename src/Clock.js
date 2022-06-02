@@ -22,8 +22,8 @@ class Clock extends Component {
         this.myRef = createRef();
 
         this.posFixed = props.lat && props.lon;
-        this.lat = 36.1169; /*33.7695;*/ // Atlanta position as default
-        this.lon = -115.1882; /*-84.3857;*/
+        this.lat = 33.7695; // Atlanta position as default
+        this.lon = -84.3857;
         if (this.posFixed) {
             this.lat = Math.max(-89.999999, Math.min(89.999999, 1 * props.lat));
             this.lon = 1 * props.lon;
@@ -34,7 +34,7 @@ class Clock extends Component {
             });
         }
 
-        if (props.tz) this.tz = -1 * props.tz;
+        if (props.tz) this.tz = props.tz === 0 ? 0 : -1 * props.tz;
         this.delay = 100;
         this.pov = 3;
         this.detials = false;
@@ -103,7 +103,7 @@ class Clock extends Component {
     initSun() {
         const group = new THREE.Group();
         const sun_geo = new THREE.SphereGeometry(0.15, 10, 10);
-        const sun_mat = new THREE.MeshLambertMaterial({ emissive: '#ffbb77' });
+        const sun_mat = new THREE.MeshBasicMaterial({ color: '#ffbb77' });
         const sun = new THREE.Mesh(sun_geo, sun_mat);
 
         const sun_light = new THREE.DirectionalLight('#775533', 5);
@@ -121,7 +121,7 @@ class Clock extends Component {
     initMoon() {
         const group = new THREE.Group();
         const moon_geo = new THREE.SphereGeometry(0.16, 40, 40);
-        const moon_mat = new THREE.MeshLambertMaterial({ emissive: '#9999cc' });
+        const moon_mat = new THREE.MeshBasicMaterial({ color: '#aaaacc' });
         const moon = new THREE.Mesh(moon_geo, moon_mat);
 
         const moon_light = new THREE.DirectionalLight( '#444499', 0 );
@@ -145,49 +145,49 @@ class Clock extends Component {
         const group = new THREE.Group();
 
         const mercury_geo = new THREE.SphereGeometry(0.008, 10, 10);
-        const mercury_mat = new THREE.MeshLambertMaterial({ color: '#f8ffa8', emissive: '#f8ffa8' });
+        const mercury_mat = new THREE.MeshBasicMaterial({ color: '#f8ffa8' });
         const mercury = new THREE.Mesh(mercury_geo, mercury_mat);
         group.add(mercury);
         this.mercury = mercury;
 
         const venus_geo = new THREE.SphereGeometry(0.024, 10, 10);
-        const venus_mat = new THREE.MeshLambertMaterial({ color: '#f5f7a1', emissive: '#f5f781' });
+        const venus_mat = new THREE.MeshBasicMaterial({ color: '#f5f781' });
         const venus = new THREE.Mesh(venus_geo, venus_mat);
         group.add(venus);
         this.venus = venus;
 
         const mars_geo = new THREE.SphereGeometry(0.016, 10, 10);
-        const mars_mat = new THREE.MeshLambertMaterial({ color: '#e3a184', emissive: '#e36124' });
+        const mars_mat = new THREE.MeshBasicMaterial({ color: '#e36124' });
         const mars = new THREE.Mesh(mars_geo, mars_mat);
         group.add(mars);
         this.mars = mars;
 
         const jupiter_geo = new THREE.SphereGeometry(0.020, 10, 10);
-        const jupiter_mat = new THREE.MeshLambertMaterial({ color: '#f0dabf', emissive: '#b0aa8f' });
+        const jupiter_mat = new THREE.MeshBasicMaterial({ color: '#b0aa8f' });
         const jupiter = new THREE.Mesh(jupiter_geo, jupiter_mat);
         group.add(jupiter);
         this.jupiter = jupiter;
 
         const saturn_geo = new THREE.SphereGeometry(0.014, 10, 10);
-        const saturn_mat = new THREE.MeshLambertMaterial({ color: '#f7c4a7', emissive: '#c7a477' });
+        const saturn_mat = new THREE.MeshBasicMaterial({ color: '#c7a477' });
         const saturn = new THREE.Mesh(saturn_geo, saturn_mat);
         group.add(saturn);
         this.saturn = saturn;
 
         const uranus_geo = new THREE.SphereGeometry(0.01, 10, 10);
-        const uranus_mat = new THREE.MeshLambertMaterial({ color: '#a2e8f7', emissive: '#72e8f7' });
+        const uranus_mat = new THREE.MeshBasicMaterial({ color: '#72e8f7' });
         const uranus = new THREE.Mesh(uranus_geo, uranus_mat);
         group.add(uranus);
         this.uranus = uranus;
 
         const neptune_geo = new THREE.SphereGeometry(0.007, 10, 10);
-        const neptune_mat = new THREE.MeshLambertMaterial({ color: '#aeb8f7', emissive: '#5e78f7' });
+        const neptune_mat = new THREE.MeshBasicMaterial({ color: '#5e78f7' });
         const neptune = new THREE.Mesh(neptune_geo, neptune_mat);
         group.add(neptune);
         this.neptune = neptune;
 
         const pluto_geo = new THREE.SphereGeometry(0.005, 10, 10);
-        const pluto_mat = new THREE.MeshLambertMaterial({ color: '#d9d3d1', emissive: '#696361' });
+        const pluto_mat = new THREE.MeshBasicMaterial({ color: '#696361' });
         const pluto = new THREE.Mesh(pluto_geo, pluto_mat);
         group.add(pluto);
         this.pluto = pluto;
@@ -211,7 +211,7 @@ class Clock extends Component {
         const group = new THREE.Group();
 
         const iss_geo = new THREE.SphereGeometry(0.018, 10, 10);
-        const iss_mat = new THREE.MeshLambertMaterial({ color: '#212636', emissive: '#ff0000' });
+        const iss_mat = new THREE.MeshBasicMaterial({ color: '#ff0000' });
         const iss = new THREE.Mesh(iss_geo, iss_mat);
         group.add(iss);
         this.iss = iss;
@@ -371,7 +371,7 @@ class Clock extends Component {
 
         // Get date
         let date = new Date();
-        if (this.tz) {
+        if (this.tz || this.tz === 0) {
             const tOff = this.tz - date.getTimezoneOffset();
             date.setTime(date.getTime() + tOff * 60000);
         }
@@ -400,11 +400,11 @@ class Clock extends Component {
         const sunRedness = Math.pow(Math.abs(Math.cos(sunPos.altitude)), 30) * 0.2 + 0.4;
         const sunMesh = this.sun.children[0];
         const sunMat = sunMesh.material;
-        sunMat.emissive.setRGB(sunRedness + 0.3, 0.7 - sunRedness/2, 0.5 - sunRedness/2);
+        sunMat.color.setRGB(sunRedness + 0.3, 0.7 - sunRedness/2, 0.5 - sunRedness/2);
 
         const sunLight = sunMesh.children[0];
         sunLight.color.setRGB(sunRedness, 0.5 - sunRedness/2, 0.33 - sunRedness/2);
-        sunLight.intensity = Math.max(Math.min(Math.sin(sunPos.altitude + 0.2)*20, 5), 0);
+        sunLight.intensity = Math.max(Math.min(Math.sin(sunPos.altitude + 0.08)*20, 5), 0);
 
         // Moon position calculation
         const moonDist = 5.6;
@@ -470,7 +470,7 @@ class Clock extends Component {
             this.nextISSTrack = date.getTime() + issUpdateFreq;
             getISSPos(this.lat, this.lon).then((pos) => {
                 this.issPos = pos;
-                this.iss.material.emissive.set('#ff0000');
+                this.iss.material.color.set('#ff0000');
                 this.iss.position.set(
                     Math.sin(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist,
                     Math.sin(pos.altitude) * satellitesDist,
@@ -478,7 +478,7 @@ class Clock extends Component {
                 this.iss.children[0].lookAt((sx*1000), (sy*1000), (sz*1000));
             });
         } else if(this.nextISSTrack - issUpdateFreq/2 <= date.getTime()) {
-            this.iss.material.emissive.set('#ffffff');
+            this.iss.material.color.set('#ffffff');
         }
 
         /*
@@ -488,7 +488,7 @@ class Clock extends Component {
             this.nextHSTTrack = date.getTime() + hstUpdateFreq;
             getHSTPos(this.lat, this.lon).then((pos) => {
                 this.hstPos = pos;
-                this.hst.material.emissive.set('#ffff00');
+                this.hst.material.color.set('#ffff00');
                 this.hst.position.set(
                     Math.sin(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist,
                     Math.sin(pos.altitude) * satellitesDist,
@@ -496,7 +496,7 @@ class Clock extends Component {
                 this.hst.children[0].lookAt((sx*1000), (sy*1000), (sz*1000));
             });
         } else if(this.nextHSTTrack - hstUpdateFreq/2 <= date.getTime()) {
-            this.hst.material.emissive.set('#ffffff');
+            this.hst.material.color.set('#ffffff');
         }
 
         // CXO position calculation
@@ -505,7 +505,7 @@ class Clock extends Component {
             this.nextCXOTrack = date.getTime() + cxoUpdateFreq;
             getCXOPos(this.lat, this.lon).then((pos) => {
                 this.cxoPos = pos;
-                this.cxo.material.emissive.set('#ffff00');
+                this.cxo.material.color.set('#ffff00');
                 this.cxo.position.set(
                     Math.sin(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist,
                     Math.sin(pos.altitude) * satellitesDist,
@@ -513,7 +513,7 @@ class Clock extends Component {
                 this.cxo.children[0].lookAt((sx*1000), (sy*1000), (sz*1000));
             });
         } else if(this.nextCXOTrack - cxoUpdateFreq/2 <= date.getTime()) {
-            this.vanguard1.material.emissive.set('#ffffff');
+            this.vanguard1.material.color.set('#ffffff');
         }
 
         // Vanguard 1 position calculation
@@ -522,7 +522,7 @@ class Clock extends Component {
             this.nextVanguard1Track = date.getTime() + vanguard1UpdateFreq;
             getVanguard1Pos(this.lat, this.lon).then((pos) => {
                 this.vanguard1Pos = pos;
-                this.vanguard1.material.emissive.set('#00ff00');
+                this.vanguard1.material.color.set('#00ff00');
                 this.vanguard1.position.set(
                     Math.sin(pos.azimuth) * Math.cos(pos.altitude) * satellitesDist,
                     Math.sin(pos.altitude) * satellitesDist,
@@ -530,7 +530,7 @@ class Clock extends Component {
                 this.vanguard1.children[0].lookAt((sx*1000), (sy*1000), (sz*1000));
             });
         } else if(this.nextVanguard1Track - vanguard1UpdateFreq/2 <= date.getTime()) {
-            this.vanguard1.material.emissive.set('#ffffff');
+            this.vanguard1.material.color.set('#ffffff');
         }
         */
 
