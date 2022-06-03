@@ -298,6 +298,9 @@ class Clock extends Component {
     }
 
     initLampLight() {
+        const date = new Date();
+        this.nextLampFlicker = date.getTime() + 100;
+
         const group = new THREE.Group();
         const lamp_geo = new THREE.SphereGeometry(0.02, 1, 1);
         const lamp_mat = new THREE.MeshLambertMaterial({ color: '#000000' });
@@ -403,8 +406,9 @@ class Clock extends Component {
         sunMat.color.setRGB(sunRedness + 0.3, 0.7 - sunRedness/2, 0.5 - sunRedness/2);
 
         const sunLight = sunMesh.children[0];
+        const sunMaxInt = 5;
         sunLight.color.setRGB(sunRedness, 0.5 - sunRedness/2, 0.33 - sunRedness/2);
-        sunLight.intensity = Math.max(Math.min(Math.sin(sunPos.altitude + 0.08)*20, 5), 0);
+        sunLight.intensity = Math.max(Math.min(Math.sin(sunPos.altitude + 0.08)*20, sunMaxInt), 0);
 
         // Moon position calculation
         const moonDist = 5.6;
@@ -417,13 +421,18 @@ class Clock extends Component {
         // Moon light intensity calculation (based on phase)
         const msV = new THREE.Vector3((sx*1000)-mx, (sy*1000)-my, (sz*1000)-mz);
         const mlV = new THREE.Vector3(mx, my, mz);
-        const moonIllum = Math.max(-msV.normalize().dot(mlV.normalize()) + 1, 0) * 2.5;
+        const moonIllum = Math.max(-msV.normalize().dot(mlV.normalize()) + 1, 0);
 
         const moonMesh = this.moon.children[0];
         const moonLight = moonMesh.children[0];
-        moonLight.intensity = Math.max(Math.sin(-sunPos.altitude), 0) * Math.max(Math.sin(moonPos.altitude), 0) * moonIllum;
+        moonLight.intensity = Math.max(Math.sin(-sunPos.altitude), 0) * Math.max(Math.sin(moonPos.altitude), 0) * moonIllum * 2.5;
 
-        // Moon phase calculation
+        // Moon light color calculation (based on sun altitude)
+        const moonMat = moonMesh.material;
+        const adjustedSunInt = sunLight.intensity / sunMaxInt;
+        moonMat.color.setRGB(0.4 + adjustedSunInt * 0.5, 0.5 + adjustedSunInt * 0.4, 0.8 + adjustedSunInt * 0.1);
+
+        // Moon phase orientation
         const moonCover = moonMesh.children[1];
         moonCover.lookAt((sx*1000), (sy*1000), (sz*1000));
 
@@ -535,8 +544,12 @@ class Clock extends Component {
         */
 
         // Lamp light calculation (based on civil twilight)
+        const lampFlickerFreq = 100;
         if (sunPos.altitude > -0.10472) this.lampLight.color.setRGB(0, 0, 0);
-        else this.lampLight.color.setRGB(Math.random()*0.2 + 0.8, 0.4, 0);
+        else if (date.getTime() >= this.nextLampFlicker) {
+            this.nextLampFlicker = date.getTime() + lampFlickerFreq;
+            this.lampLight.color.setRGB(Math.random()*0.2 + 0.8, 0.4, 0);
+        }
 
         // Ambient light calculation
         const ambientIllum = Math.max(Math.sin(sunPos.altitude), 0) * 0.4 - 0.2;
