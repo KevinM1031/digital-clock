@@ -380,9 +380,9 @@ class Clock extends Component {
             date.setTime(date.getTime() + tOff * 60000);
         }
 
-        if (!this.offset) this.offset = 0;
-        date.setTime(date.getTime() + this.offset);
-        this.offset += 1000000;
+        //if (!this.offset) this.offset = 0;
+        //date.setTime(date.getTime() + this.offset);
+        //this.offset += 1000000;
 
         // Get screen dimensions
         const width = getWidth();
@@ -475,7 +475,7 @@ class Clock extends Component {
 
         // ISS position calculation
         const satellitesDist = 5.4
-        const issUpdateFreq = 20000000000;
+        const issUpdateFreq = 2000;
         if (this.nextISSTrack <= date.getTime()) {
             this.nextISSTrack = date.getTime() + issUpdateFreq;
             getISSPos(this.lat, this.lon).then((pos) => {
