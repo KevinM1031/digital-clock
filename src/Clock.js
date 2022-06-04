@@ -93,11 +93,12 @@ class Clock extends Component {
     initAmbientLight() {
 		const light = new THREE.AmbientLight( '#222222' );
 		this.scene.add( light );
+
         const ambientLight = new THREE.DirectionalLight('#335599', 0.3);
-        ambientLight.position.set(-40, 10, 20);
+        ambientLight.castShadow = false;
+        ambientLight.position.set(0, 100, 0);
         this.scene.add(ambientLight);
         this.ambientLight = ambientLight;
-
     }
 
     initSun() {
@@ -379,9 +380,9 @@ class Clock extends Component {
             date.setTime(date.getTime() + tOff * 60000);
         }
 
-        //if (!this.offset) this.offset = 0;
-        //date.setTime(date.getTime() + this.offset);
-        //this.offset += 500000;
+        if (!this.offset) this.offset = 0;
+        date.setTime(date.getTime() + this.offset);
+        this.offset += 1000000;
 
         // Get screen dimensions
         const width = getWidth();
@@ -421,11 +422,11 @@ class Clock extends Component {
         // Moon light intensity calculation (based on phase)
         const msV = new THREE.Vector3((sx*1000)-mx, (sy*1000)-my, (sz*1000)-mz);
         const mlV = new THREE.Vector3(mx, my, mz);
-        const moonIllum = Math.max(-msV.normalize().dot(mlV.normalize()) + 1, 0);
+        const moonIllum = Math.max(-msV.normalize().dot(mlV.normalize()) + 1, 0) + 0.2;
 
         const moonMesh = this.moon.children[0];
         const moonLight = moonMesh.children[0];
-        moonLight.intensity = Math.max(Math.sin(-sunPos.altitude), 0) * Math.max(Math.sin(moonPos.altitude), 0) * moonIllum * 2.5;
+        moonLight.intensity = Math.max(Math.sin(-sunPos.altitude), 0) * (Math.max(Math.sin(moonPos.altitude), 0) + 0.8) * moonIllum;
 
         // Moon light color calculation (based on sun altitude)
         const moonMat = moonMesh.material;
@@ -474,7 +475,7 @@ class Clock extends Component {
 
         // ISS position calculation
         const satellitesDist = 5.4
-        const issUpdateFreq = 2000;
+        const issUpdateFreq = 20000000000;
         if (this.nextISSTrack <= date.getTime()) {
             this.nextISSTrack = date.getTime() + issUpdateFreq;
             getISSPos(this.lat, this.lon).then((pos) => {
@@ -553,7 +554,7 @@ class Clock extends Component {
 
         // Ambient light calculation
         const ambientIllum = Math.max(Math.sin(sunPos.altitude), 0) * 0.4 - 0.2;
-        this.ambientLight.intensity = ambientIllum * 1.5 + 0.8;
+        this.ambientLight.intensity = ambientIllum + 0.5;
         this.ambientLight.color.setRGB(0.5 + ambientIllum, 0.5, 0.5 - ambientIllum);
 
         // Time text update
