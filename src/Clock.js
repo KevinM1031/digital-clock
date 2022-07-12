@@ -36,6 +36,7 @@ class Clock extends Component {
 
         if (props.tz) this.tz = props.tz === 0 ? 0 : -1 * props.tz;
         this.delay = 100;
+        this.nextFrame = 0;
         this.pov = 3;
         this.detials = false;
 
@@ -362,8 +363,8 @@ class Clock extends Component {
     }
 
     start() {
-        if (!this.frameId);
-            this.frameId = requestAnimationFrame(this.animate)
+        if (!this.frameId)
+            this.frameId = requestAnimationFrame(this.animate);
     }
 
     stop() {
@@ -371,10 +372,15 @@ class Clock extends Component {
     }
 
     animate() {
+        let date = new Date();
+        if (date.getTime() < this.nextFrame) {
+            requestAnimationFrame(this.animate);
+            return;
+        } else this.nextFrame = date.getTime() + this.delay;
+
         this.controls.update();
 
         // Get date
-        let date = new Date();
         if (this.tz || this.tz === 0) {
             const tOff = this.tz - date.getTimezoneOffset();
             date.setTime(date.getTime() + tOff * 60000);
@@ -810,9 +816,7 @@ class Clock extends Component {
         }
 
         this.composer.render();
-        setTimeout( () => {
-            this.frameId = window.requestAnimationFrame(this.animate);
-        }, this.delay );
+        this.frameId = window.requestAnimationFrame(this.animate);
     }
 
     updatePerspective() {
