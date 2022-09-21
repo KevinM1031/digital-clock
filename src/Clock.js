@@ -35,12 +35,21 @@ class Clock extends Component {
         }
 
         if (props.tz) this.tz = props.tz === 0 ? 0 : -1 * props.tz;
-        this.delay = 100;
+
+        this.initPosX = props.x ? parseFloat(props.x) : -9;
+        this.initPosY = props.y ? parseFloat(props.y) : 4;
+        this.initPosZ = props.z ? parseFloat(props.z) : -4;
+        this.pov = props.pov ? parseInt(props.pov) : 3;
+        this.details = props.det ? props.det === "true" : false;
+        this.delay = props.del ? parseInt(props.del) : 100;
+        this.rotate = props.rot ? props.rot === "true" : false;
+
         this.nextFrame = 0;
-        this.pov = 3;
-        this.detials = false;
 
         window.addEventListener('resize', () => {this.resize()});
+
+        let date = new Date();
+        this.refreshDate = date.getTime() + 86400000;
     }
 
     componentDidMount() {
@@ -52,7 +61,7 @@ class Clock extends Component {
         const height = getHeight();
 
         this.camera = new THREE.PerspectiveCamera( 60, width / height, 0.01, 100 );
-        this.camera.position.set(-9, 4, -4);
+        this.camera.position.set(this.initPosX, this.initPosY, this.initPosZ);
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
 
@@ -77,6 +86,7 @@ class Clock extends Component {
         this.controls.listenToKeyEvents(this.canvas);
         this.controls.minDistance = 5;
         this.controls.maxDistance = 50;
+        this.controls.autoRotate = this.rotate;
 
         this.initAmbientLight();
         this.initSun();
@@ -363,6 +373,8 @@ class Clock extends Component {
     }
 
     start() {
+        this.updatePerspective(false);
+        
         if (!this.frameId)
             this.frameId = requestAnimationFrame(this.animate);
     }
@@ -373,6 +385,26 @@ class Clock extends Component {
 
     animate() {
         let date = new Date();
+
+        if (date.getTime() >= this.refreshDate) {
+            let link = '/digital-clock?';
+
+            link += "x=" + this.camera.position.x;
+            link += "&y=" + this.camera.position.y;
+            link += "&z=" + this.camera.position.z;
+            
+            link += "&del=" + this.delay;
+            link += "&rot=" + this.controls.autoRotate;
+            link += "&det=" + this.details;
+            link += "&pov=" + this.pov;
+
+            if (this.posFixed) link += "&lat=" + this.lat + "&lon=" + this.lon;
+            if (this.tz) link += "&tz=" + this.tz;
+
+            this.refreshDate = date.getTime() + 99999999;
+            window.location.href = link;
+        }
+
         if (date.getTime() < this.nextFrame) {
             requestAnimationFrame(this.animate);
             return;
@@ -819,25 +851,25 @@ class Clock extends Component {
         this.frameId = window.requestAnimationFrame(this.animate);
     }
 
-    updatePerspective() {
-
+    updatePerspective(resetPos=true) {
         if (this.pov === 3) {
             this.controls.minDistance = 5;
             this.controls.maxDistance = 50;
             this.controls.reset();
             this.controls.target.set(0, 0, 0);
 
-            this.camera.position.set(-9, 4, -4);
+            if (resetPos) this.camera.position.set(-9, 4, -4);
             
-
         } else {
-            this.controls.minDistance = 0;
-            this.controls.maxDistance = 0.001;
+            this.controls.minDistance = 0.01;
+            this.controls.maxDistance = 0.1;
             this.controls.reset();
             this.controls.target.set(-0.9972, 0.1017, 0.395);
 
-            this.camera.position.set(-1, 0.1, 0.4);
-            this.camera.lookAt(2, 2, -5);
+            if (resetPos) {
+                this.camera.position.set(-1, 0.1, 0.4);
+                this.camera.lookAt(2, 2, -5);
+            }
         }
 
         this.camera.updateProjectionMatrix();
