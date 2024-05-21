@@ -1,7 +1,7 @@
 # Digital Clock
 
 A cool little online digital clock.  
-Visit the [website](https://kevinm1031.github.io/digital-clock/).
+Visit the [website](https://kevinm1031.github.io/digital-clock/?del=25).
 
 Includes a floating island (my first ever 3D model) orbited by a sun, moon, 7 other planets, Pluto, and the ISS.  
 Positions of these celestial bodies are calculated based on the local position of the user (neat).  
