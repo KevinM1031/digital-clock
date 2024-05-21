@@ -41,7 +41,7 @@ class Clock extends Component {
         this.initPosZ = props.z ? parseFloat(props.z) : -4;
         this.pov = props.pov ? parseInt(props.pov) : 3;
         this.details = props.det ? props.det === "true" : false;
-        this.delay = props.del ? parseInt(props.del) : 100;
+        this.delay = props.del ? parseInt(props.del) : 25;
         this.rotate = props.rot ? props.rot === "true" : false;
 
         this.nextFrame = 0;
